@@ -67,9 +67,17 @@ const App: React.FC = () => {
     const handleInvestorChange = useCallback((id: number, field: keyof Omit<Investor, 'id'>, value: string | number) => {
         setInputs(prev => ({
             ...prev,
-            investors: prev.investors.map(inv => 
-                inv.id === id ? { ...inv, [field]: value } : inv
-            )
+            investors: prev.investors.map(inv => {
+                if (inv.id === id) {
+                    // For participation, ensure it's a number and not negative.
+                    if (field === 'participation') {
+                        const numericValue = Number(value);
+                        return { ...inv, [field]: isNaN(numericValue) || numericValue < 0 ? 0 : numericValue };
+                    }
+                    return { ...inv, [field]: value };
+                }
+                return inv;
+            })
         }));
     }, []);
     
@@ -109,6 +117,8 @@ const App: React.FC = () => {
         setInputs(initialInputs);
     }, []);
 
+    const totalParticipation = inputs.investors.reduce((sum, inv) => sum + inv.participation, 0);
+
     return (
         <div className="min-h-screen p-4 sm:p-8">
             <main className="max-w-screen-2xl mx-auto">
@@ -129,6 +139,7 @@ const App: React.FC = () => {
                             onInvestorChange={handleInvestorChange}
                             onInvestorCountChange={handleInvestorCountChange}
                             onReset={handleReset}
+                            totalParticipation={totalParticipation}
                         />
                     </div>
                     <div className="lg:col-span-3">

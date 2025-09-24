@@ -52,7 +52,7 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
                 </button>
             </div>
             
-            <div ref={reportRef} className="glassmorphism p-6 text-gray-800">
+            <div ref={reportRef} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 text-gray-800">
                 <div id="report-content">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                         <SummaryCard title="Coste Total Operación" value={result.totalProjectCost} icon="fa-solid fa-building-shield" color="text-red-500" isCurrency />
@@ -61,22 +61,22 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div className="bg-white/40 p-4 rounded-lg border border-white/20">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <h3 className="text-xl font-semibold text-gray-700 mb-3"><i className="fa-solid fa-calculator mr-2 text-amber-500"></i>Desglose de Costes</h3>
                             <DetailRow label="Coste Compra (Neto + Imp.)" value={formatCurrency(result.totalPurchaseCost)} />
                             <DetailRow label="Coste Reforma y otros (Neto + Imp.)" value={formatCurrency(result.totalRenovationCost)} />
                             <DetailRow label="Licencias y Gastos" value={formatCurrency(result.totalLicensesCost + result.totalOtherCosts)} />
                             <DetailRow label="COSTE TOTAL" value={formatCurrency(result.totalProjectCost)} isTotal />
                         </div>
-                        <div className="bg-white/40 p-4 rounded-lg border border-white/20">
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <h3 className="text-xl font-semibold text-gray-700 mb-3"><i className="fa-solid fa-landmark mr-2 text-amber-500"></i>Financiación y Capital</h3>
                             <DetailRow label="Importe Financiado (Total)" value={formatCurrency(result.loanAmount)} />
                             <DetailRow label="Costes Asociados Préstamo (Total)" value={formatCurrency(result.loanAssociatedCosts)} />
-                            <DetailRow label="CAPITAL TOTAL APORTADO" value={formatCurrency(result.totalCapitalProvided)} isTotal />
+                            <DetailRow label="CAPITAL TOTAL A APORTAR" value={formatCurrency(result.totalCapitalProvided)} isTotal />
                         </div>
                     </div>
 
-                    <div className="bg-white/40 p-4 rounded-lg border border-white/20">
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                         <h3 className="text-xl font-semibold text-gray-700 mb-3"><i className="fa-solid fa-users-viewfinder mr-2 text-amber-500"></i>Reparto de Beneficios por Inversor</h3>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm">
@@ -85,7 +85,7 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
                                         <th className="p-3 font-semibold">Inversor</th>
                                         <th className="p-3 text-center font-semibold">Participación</th>
                                         <th className="p-3 font-semibold">Tipo</th>
-                                        <th className="p-3 text-right font-semibold">Capital Aportado</th>
+                                        <th className="p-3 text-right font-semibold">Capital a Aportar</th>
                                         <th className="p-3 text-right font-semibold">Beneficio Bruto</th>
                                         <th className="p-3 text-right font-semibold">Impuestos</th>
                                         <th className="p-3 text-right font-bold text-base">Beneficio Neto</th>

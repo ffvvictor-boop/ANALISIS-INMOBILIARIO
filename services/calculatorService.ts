@@ -62,8 +62,12 @@ export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationR
     const contingencyAmount = renovationAndFurnitureCost * (inputs.contingencyRate / 100);
     const renovationNetBeforeVat = renovationAndFurnitureCost + contingencyAmount + inputs.generalExpenses;
 
-    const renovationVatRate = inputs.renovationVatType === '10' ? 0.10 : 0.21;
-    const renovationVat = renovationNetBeforeVat * renovationVatRate;
+    let renovationVat = 0;
+    if (inputs.renovationVatType === '10') {
+        renovationVat = renovationNetBeforeVat * 0.10;
+    } else if (inputs.renovationVatType === '21') {
+        renovationVat = renovationNetBeforeVat * 0.21;
+    }
     
     const technicalFeesVat = inputs.technicalFees * 0.21;
     

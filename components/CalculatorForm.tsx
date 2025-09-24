@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { RealEstateDealInput, Investor } from '../types';
 
 interface InputFieldProps {
@@ -65,7 +65,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({ id, label, checked, onCha
 const Section: React.FC<{ title: string; icon: string; children: React.ReactNode; defaultOpen?: boolean }> = ({ title, icon, children, defaultOpen = false }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
-        <details open={isOpen} onToggle={(e) => setIsOpen((e.currentTarget as HTMLDetailsElement).open)} className="bg-white/50 p-4 rounded-lg border border-white/30">
+        <details open={isOpen} onToggle={(e) => setIsOpen((e.currentTarget as HTMLDetailsElement).open)} className="bg-gray-50/80 p-4 rounded-lg border border-gray-200">
             <summary className="cursor-pointer text-lg font-semibold text-gray-700 flex justify-between items-center">
                 <span><i className={`${icon} mr-3 text-blue-500`}></i>{title}</span>
                 <i className={`fas fa-chevron-down text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}></i>
@@ -99,14 +99,16 @@ interface DealFormProps {
     onInvestorChange: (id: number, field: keyof Omit<Investor, 'id'>, value: string | number) => void;
     onInvestorCountChange: (count: number) => void;
     onReset: () => void;
+    totalParticipation: number;
 }
 
-const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorChange, onInvestorCountChange, onReset }) => {
+const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorChange, onInvestorCountChange, onReset, totalParticipation }) => {
     
-    const totalParticipation = useMemo(() => inputs.investors.reduce((sum, inv) => sum + Number(inv.participation || 0), 0), [inputs.investors]);
+    const totalParticipationRounded = parseFloat(totalParticipation.toFixed(2));
+    const participationError = totalParticipationRounded !== 100;
 
     return (
-        <div className="glassmorphism p-6 max-h-[85vh] overflow-y-auto">
+        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 max-h-[85vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Datos de la Operación</h2>
             <div className="space-y-4">
                 
@@ -136,7 +138,7 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                     <InputField id="contingencyRate" label="Desvíos" icon="fa-solid fa-percent" value={inputs.contingencyRate} onChange={onInputChange} unit="%"/>
                     <InputField id="generalExpenses" label="Gastos Generales" icon="fa-solid fa-file-invoice" value={inputs.generalExpenses} onChange={onInputChange} unit="€"/>
                     <InputField id="technicalFees" label="Honorarios Técnicos (+21% IVA)" icon="fa-solid fa-helmet-safety" value={inputs.technicalFees} onChange={onInputChange} unit="€"/>
-                    <SelectField id="renovationVatType" label="IVA Reforma" icon="fa-solid fa-percent" value={inputs.renovationVatType} onChange={onInputChange} options={[ { value: '10', label: 'IVA (10%)' }, { value: '21', label: 'IVA (21%)' } ]}/>
+                    <SelectField id="renovationVatType" label="IVA Reforma" icon="fa-solid fa-percent" value={inputs.renovationVatType} onChange={onInputChange} options={[ { value: '10', label: 'IVA (10%)' }, { value: '21', label: 'IVA (21%)' }, { value: 'none', label: 'Sin IVA' } ]}/>
                     <InputField id="icioRate" label="ICIO" icon="fa-solid fa-percent" value={inputs.icioRate} onChange={onInputChange} unit="%"/>
                 </Section>
 
@@ -148,12 +150,12 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                         </select>
                     </div>
                     {inputs.investors.map((investor, index) => (
-                        <div key={investor.id} className="p-4 bg-white/60 rounded-lg mt-2 space-y-4 border border-white/40">
+                        <div key={investor.id} className="p-4 bg-gray-50 rounded-lg mt-2 space-y-4 border border-gray-200">
                             <h4 className="font-semibold text-gray-800 border-b border-gray-200 pb-2">Inversor {index + 1}</h4>
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-xs text-gray-500 mb-1">Participación</label>
-                                    <MinimalistInputField id={`participation-${investor.id}`} value={investor.participation} onChange={(e) => onInvestorChange(investor.id, 'participation', parseFloat(e.target.value))} unit="%"/>
+                                    <MinimalistInputField id={`participation-${investor.id}`} value={investor.participation} onChange={(e) => onInvestorChange(investor.id, 'participation', e.target.value)} unit="%"/>
                                 </div>
                                 <div>
                                     <label className="block text-xs text-gray-500 mb-1">Tipo</label>
@@ -167,24 +169,24 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                              <div className="grid grid-cols-3 gap-4 pt-2">
                                 <div>
                                     <label className="block text-xs text-gray-500 mb-1">% Financiación</label>
-                                    <MinimalistInputField id={`financingPercentage-${investor.id}`} value={investor.financingPercentage} onChange={(e) => onInvestorChange(investor.id, 'financingPercentage', parseFloat(e.target.value))} unit="%"/>
+                                    <MinimalistInputField id={`financingPercentage-${investor.id}`} value={investor.financingPercentage} onChange={(e) => onInvestorChange(investor.id, 'financingPercentage', e.target.value)} unit="%"/>
                                 </div>
                                 <div>
                                     <label className="block text-xs text-gray-500 mb-1">TAE</label>
-                                    <MinimalistInputField id={`loanInterestRate-${investor.id}`} value={investor.loanInterestRate} onChange={(e) => onInvestorChange(investor.id, 'loanInterestRate', parseFloat(e.target.value))} unit="%"/>
+                                    <MinimalistInputField id={`loanInterestRate-${investor.id}`} value={investor.loanInterestRate} onChange={(e) => onInvestorChange(investor.id, 'loanInterestRate', e.target.value)} unit="%"/>
                                 </div>
                                 <div>
                                     <label className="block text-xs text-gray-500 mb-1">Costes Asoc.</label>
-                                    <MinimalistInputField id={`associatedCostsRate-${investor.id}`} value={investor.associatedCostsRate} onChange={(e) => onInvestorChange(investor.id, 'associatedCostsRate', parseFloat(e.target.value))} unit="%"/>
+                                    <MinimalistInputField id={`associatedCostsRate-${investor.id}`} value={investor.associatedCostsRate} onChange={(e) => onInvestorChange(investor.id, 'associatedCostsRate', e.target.value)} unit="%"/>
                                 </div>
                              </div>
                         </div>
                     ))}
-                    {Math.round(totalParticipation * 100) / 100 !== 100 && (
-                        <p className="text-red-600 text-sm font-bold mt-2 text-center p-2 bg-red-100 border border-red-200 rounded-lg">
-                            <i className="fa-solid fa-triangle-exclamation mr-2"></i>
-                            La suma de participaciones es {totalParticipation.toFixed(2)}%. Debe ser 100%.
-                        </p>
+                    {participationError && (
+                        <div className="mt-2 p-3 bg-red-100 border border-red-300 text-red-800 text-sm rounded-lg" role="alert">
+                            <i className="fas fa-exclamation-triangle mr-2"></i>
+                            La suma de las participaciones debe ser 100%. Actualmente es <strong>{totalParticipationRounded}%</strong>.
+                        </div>
                     )}
                 </Section>
                 

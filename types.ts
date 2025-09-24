@@ -25,7 +25,7 @@ export interface RealEstateDealInput {
     contingencyRate: number; // Desvíos (%)
     generalExpenses: number; // Gastos Generales (valor absoluto)
     technicalFees: number; // Honorarios Técnicos
-    renovationVatType: '10' | '21';
+    renovationVatType: '10' | '21' | 'none';
     icioRate: number; // ICIO (%)
 
     // Venta

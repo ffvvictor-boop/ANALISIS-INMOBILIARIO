@@ -6,6 +6,7 @@ interface SummaryCardProps {
     icon: string;
     color: string;
     isCurrency?: boolean;
+    highlight?: 'green' | 'red';
 }
 
 const formatValue = (value: number, isCurrency: boolean) => {
@@ -15,15 +16,29 @@ const formatValue = (value: number, isCurrency: boolean) => {
     return `${value.toFixed(2)}%`;
 };
 
-const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, color, isCurrency = false }) => {
+const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, color, isCurrency = false, highlight }) => {
+    let backgroundClasses = 'bg-gray-100';
+    let titleClasses = 'text-gray-500';
+    let valueClasses = 'text-gray-800';
+
+    if (highlight === 'green') {
+        backgroundClasses = 'bg-green-200';
+        titleClasses = 'text-green-900/80';
+        valueClasses = 'text-green-900';
+    } else if (highlight === 'red') {
+        backgroundClasses = 'bg-red-200';
+        titleClasses = 'text-red-900/80';
+        valueClasses = 'text-red-900';
+    }
+
     return (
-        <div className="bg-gray-100 p-5 rounded-xl flex items-center space-x-4">
+        <div className={`p-5 rounded-xl flex items-center space-x-4 ${backgroundClasses} transition-all duration-300`}>
             <div className={`text-3xl ${color}`}>
                 <i className={`${icon}`}></i>
             </div>
             <div>
-                <p className="text-sm text-gray-500">{title}</p>
-                <p className="text-2xl font-bold text-gray-800">
+                <p className={`text-sm font-medium ${titleClasses}`}>{title}</p>
+                <p className={`text-2xl font-bold ${valueClasses}`}>
                     {formatValue(value, isCurrency)}
                 </p>
             </div>

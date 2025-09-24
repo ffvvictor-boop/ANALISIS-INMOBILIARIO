@@ -3,6 +3,7 @@ import { RealEstateDealInput, CalculationResult, Investor } from './types';
 import { analyzeRealEstateDeal } from './services/calculatorService';
 import DealForm from './components/CalculatorForm';
 import ReportDisplay from './components/ResultsDisplay';
+import DetailedReport from './components/DetailedReport';
 
 const initialInvestors: Investor[] = [{ 
     id: 1, 
@@ -44,6 +45,7 @@ const initialInputs: RealEstateDealInput = {
 const App: React.FC = () => {
     const [inputs, setInputs] = useState<RealEstateDealInput>(initialInputs);
     const [result, setResult] = useState<CalculationResult | null>(null);
+    const [reportView, setReportView] = useState<'summary' | 'details'>('summary');
 
     useEffect(() => {
         const calculatedResult = analyzeRealEstateDeal(inputs);
@@ -69,7 +71,6 @@ const App: React.FC = () => {
             ...prev,
             investors: prev.investors.map(inv => {
                 if (inv.id === id) {
-                    // For participation, ensure it's a number and not negative.
                     if (field === 'participation') {
                         const numericValue = Number(value);
                         return { ...inv, [field]: isNaN(numericValue) || numericValue < 0 ? 0 : numericValue };
@@ -144,7 +145,25 @@ const App: React.FC = () => {
                     </div>
                     <div className="lg:col-span-3">
                         {result ? (
-                            <ReportDisplay result={result} />
+                            <div className="space-y-4">
+                                <div className="flex items-center bg-gray-200/80 p-1 rounded-xl">
+                                    <button 
+                                        onClick={() => setReportView('summary')}
+                                        className={`w-1/2 py-2 px-4 text-sm font-bold rounded-lg transition-all duration-300 ${reportView === 'summary' ? 'bg-white text-blue-600 shadow-md' : 'text-gray-600'}`}>
+                                        <i className="fas fa-chart-pie mr-2"></i>Resumen de Rentabilidad
+                                    </button>
+                                    <button 
+                                        onClick={() => setReportView('details')}
+                                        className={`w-1/2 py-2 px-4 text-sm font-bold rounded-lg transition-all duration-300 ${reportView === 'details' ? 'bg-white text-blue-600 shadow-md' : 'text-gray-600'}`}>
+                                        <i className="fas fa-list-check mr-2"></i>Informe Detallado
+                                    </button>
+                                </div>
+                                {reportView === 'summary' ? (
+                                    <ReportDisplay result={result} />
+                                ) : (
+                                    <DetailedReport result={result} inputs={inputs} />
+                                )}
+                            </div>
                         ) : (
                            <div className="h-full flex items-center justify-center p-8 bg-white border border-gray-200/80 rounded-2xl shadow-sm">
                                <div className="text-center text-gray-500">

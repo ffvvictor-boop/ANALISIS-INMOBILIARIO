@@ -65,7 +65,6 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
                             <h3 className="text-xl font-semibold text-gray-700 mb-3"><i className="fa-solid fa-calculator mr-2 text-amber-500"></i>Desglose de Costes</h3>
                             <DetailRow label="Coste Compra (Neto + Imp.)" value={formatCurrency(result.totalPurchaseCost)} />
                             <DetailRow label="Coste Reforma y otros (Neto + Imp.)" value={formatCurrency(result.totalRenovationCost)} />
-                            <DetailRow label="Licencias y Gastos" value={formatCurrency(result.totalLicensesCost + result.totalOtherCosts)} />
                             <DetailRow label="COSTE TOTAL" value={formatCurrency(result.totalProjectCost)} isTotal />
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">

@@ -1,129 +1,94 @@
-import { RealEstateDealInput, CalculationResult, InvestorResult } from '../types';
+import { RealEstateDealInput, CalculationResult, InvestorBreakdown, CalculationDetails } from '../types';
 
-/**
- * Calcula el impuesto IRPF de forma progresiva según los tramos españoles.
- * @param profit El beneficio bruto sobre el que se calcula el impuesto.
- * @returns El importe total del impuesto a pagar.
- */
-const calculateIrpf = (profit: number): number => {
-    if (profit <= 0) return 0;
+const SUPPLY_SETUP_FEE = 250;
+const VAT_RATE = 0.21;
 
-    const brackets = [
-        { limit: 300000, rate: 0.47 },
-        { limit: 60000, rate: 0.45 },
-        { limit: 35200, rate: 0.37 },
-        { limit: 20200, rate: 0.30 },
-        { limit: 12450, rate: 0.24 },
-        { limit: 0, rate: 0.19 },
-    ];
-
-    let tax = 0;
-    let remainingProfit = profit;
-
-    for (const bracket of brackets) {
-        if (remainingProfit > bracket.limit) {
-            tax += (remainingProfit - bracket.limit) * bracket.rate;
-            remainingProfit = bracket.limit;
-        }
+const getPurchaseTaxRate = (type: string): number => {
+    switch (type) {
+        case 'itp_10': return 0.10;
+        case 'itp_6': return 0.06;
+        case 'iva_21': return 0.21;
+        default: return 0.10;
     }
+};
 
-    return tax;
+const getRenovationVatRate = (type: string): number => {
+    switch (type) {
+        case '10': return 0.10;
+        case '21': return 0.21;
+        case 'none': return 0;
+        default: return 0.10;
+    }
+};
+
+const calculateProfitTax = (profit: number, type: 'individual' | 'company'): number => {
+    if (type === 'company') {
+        return profit * 0.25; // Corporate tax (simplified)
+    }
+    // IRPF for individuals (simplified progressive scale)
+    if (profit <= 6000) return profit * 0.19;
+    if (profit <= 50000) return (6000 * 0.19) + ((profit - 6000) * 0.21);
+    if (profit <= 200000) return (6000 * 0.19) + (44000 * 0.21) + ((profit - 50000) * 0.23);
+    return (6000 * 0.19) + (44000 * 0.21) + (150000 * 0.23) + ((profit - 200000) * 0.26);
 };
 
 
 export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationResult => {
-    // --- 1. CÁLCULO DE COSTES DE COMPRA ---
-    let purchaseTax = 0;
-    switch (inputs.purchaseTaxType) {
-        case 'itp_10':
-            purchaseTax = inputs.propertyValue * 0.10;
-            break;
-        case 'itp_6':
-            purchaseTax = inputs.propertyValue * 0.06;
-            break;
-        case 'iva_21':
-            purchaseTax = inputs.propertyValue * 0.21;
-            break;
-    }
+    // 1. Purchase Costs
+    const purchaseTaxRate = getPurchaseTaxRate(inputs.purchaseTaxType);
+    const purchaseTax = inputs.propertyValue * purchaseTaxRate;
+    const totalPurchaseCost = inputs.propertyValue + purchaseTax + inputs.notaryFees + inputs.registryFees + inputs.agencyFees + inputs.realEstateAgencyFees;
 
-    // Se añade el 21% de IVA a los costes de gestoría y honorarios de inmobiliaria, ya que los inputs son netos.
-    const agencyFeesVat = inputs.agencyFees * 0.21;
-    const realEstateAgencyFeesVat = inputs.realEstateAgencyFees * 0.21;
+    // 2. Renovation, Licenses & Other Costs
+    const supplySetupCost = ((inputs.setupElectricity ? 1 : 0) + (inputs.setupWater ? 1 : 0)) * SUPPLY_SETUP_FEE * (1 + VAT_RATE);
+    
+    const renovationBaseCost = inputs.areaSqm * inputs.renovationCostPerSqm;
+    const furnitureBaseCost = inputs.areaSqm * inputs.furnitureCostPerSqm;
+    const renovationVatRate = getRenovationVatRate(inputs.renovationVatType);
+    const renovationVat = (renovationBaseCost + furnitureBaseCost) * renovationVatRate;
+    
+    const contingencyAmount = (renovationBaseCost + furnitureBaseCost) * (inputs.contingencyRate / 100);
+    
+    const technicalFeesVat = inputs.technicalFees * VAT_RATE;
+    const totalTechnicalFees = inputs.technicalFees + technicalFeesVat;
 
-    const totalPurchaseNet = inputs.propertyValue + inputs.notaryFees + inputs.registryFees + inputs.agencyFees + inputs.realEstateAgencyFees;
-    const totalPurchaseTaxes = purchaseTax + agencyFeesVat + realEstateAgencyFeesVat;
-    const totalPurchaseCost = totalPurchaseNet + totalPurchaseTaxes;
+    const icioTax = renovationBaseCost * (inputs.icioRate / 100);
 
-    // --- 2. CÁLCULO DE COSTES DE REFORMA, TÉCNICOS Y SUMINISTROS ---
-    const renovationBaseCost = inputs.renovationCostPerSqm * inputs.areaSqm;
-    const furnitureBaseCost = inputs.furnitureCostPerSqm * inputs.areaSqm;
-    const renovationAndFurnitureCost = renovationBaseCost + furnitureBaseCost;
+    const totalRenovationCost = renovationBaseCost + furnitureBaseCost + renovationVat + contingencyAmount + inputs.generalExpenses + totalTechnicalFees + icioTax + supplySetupCost;
     
-    const contingencyAmount = renovationAndFurnitureCost * (inputs.contingencyRate / 100);
-    const renovationNetBeforeVat = renovationAndFurnitureCost + contingencyAmount + inputs.generalExpenses;
-
-    let renovationVat = 0;
-    if (inputs.renovationVatType === '10') {
-        renovationVat = renovationNetBeforeVat * 0.10;
-    } else if (inputs.renovationVatType === '21') {
-        renovationVat = renovationNetBeforeVat * 0.21;
-    }
+    // 3. Total Project Cost
+    const totalProjectCost = totalPurchaseCost + totalRenovationCost;
     
-    const technicalFeesVat = inputs.technicalFees * 0.21;
-    
-    const utilitiesNet = (inputs.setupElectricity ? 250 : 0) + (inputs.setupWater ? 250 : 0);
-    const utilitiesVat = utilitiesNet * 0.21;
-
-    const totalRenovationNet = renovationNetBeforeVat + inputs.technicalFees + utilitiesNet;
-    const totalRenovationTaxes = renovationVat + technicalFeesVat + utilitiesVat;
-    const totalRenovationCost = totalRenovationNet + totalRenovationTaxes;
-    
-    // --- 3. CÁLCULO DE LICENCIAS Y OTROS ---
-    const icioCost = renovationBaseCost * (inputs.icioRate / 100);
-    const totalLicensesCost = icioCost;
-    const totalOtherCosts = inputs.ibiFee + inputs.insuranceFee;
-    
-    // --- 4. COSTE TOTAL DEL PROYECTO ---
-    const totalProjectCost = totalPurchaseCost + totalRenovationCost + totalLicensesCost + totalOtherCosts;
-    
-    // --- 5. ANÁLISIS DE VENTA ---
-    const saleNetIncome = inputs.salePrice;
+    // 4. Sale projection
     const capitalGainsTax = inputs.salePrice * (inputs.capitalGainsTaxRate / 100);
-    const saleExpenses = capitalGainsTax + inputs.ceeCost + inputs.notarySaleCost;
-    const saleProfitBeforeTax = saleNetIncome - totalProjectCost - saleExpenses;
-    const saleProfitability = totalProjectCost > 0 ? (saleProfitBeforeTax / totalProjectCost) * 100 : 0;
-    
-    // --- 6. ANÁLISIS DE ALQUILER ---
-    const annualRentalIncome = inputs.monthlyRent * 12;
-    const annualRentalExpenses = inputs.ibiFee + inputs.insuranceFee + (inputs.cleaningFee * 12);
+    const totalSaleExpenses = capitalGainsTax + inputs.ceeCost + inputs.notarySaleCost;
+    const saleProfitBeforeTax = inputs.salePrice - totalProjectCost - totalSaleExpenses;
 
-    // --- 7. ANÁLISIS DE FINANCIACIÓN Y CAPITAL APORTADO (POR INVERSOR) ---
+    const saleProfitability = totalProjectCost > 0 ? (saleProfitBeforeTax / totalProjectCost) * 100 : 0;
+
+    // 5. Financing
     let totalLoanAmount = 0;
     let totalLoanAssociatedCosts = 0;
-    let totalCapitalProvided = 0;
-    const CORPORATE_TAX_RATE = 0.25; // 25%
 
-    const investorBreakdown: InvestorResult[] = inputs.investors.map(investor => {
-        const investorShareOfCost = totalProjectCost * (investor.participation / 100);
-        
-        const loanAmount = investorShareOfCost * (investor.financingPercentage / 100);
-        const loanAssociatedCosts = loanAmount * (investor.associatedCostsRate / 100);
-        
-        const unfinancedCapital = investorShareOfCost - loanAmount;
-        const capitalProvided = unfinancedCapital + loanAssociatedCosts;
+    inputs.investors.forEach(investor => {
+        const loanAmountForInvestor = inputs.propertyValue * (investor.financingPercentage / 100) * (investor.participation / 100);
+        totalLoanAmount += loanAmountForInvestor;
+        totalLoanAssociatedCosts += loanAmountForInvestor * (investor.associatedCostsRate / 100);
+    });
+    
+    const totalCapitalProvided = totalProjectCost - totalLoanAmount + totalLoanAssociatedCosts;
 
-        totalLoanAmount += loanAmount;
-        totalLoanAssociatedCosts += loanAssociatedCosts;
-        totalCapitalProvided += capitalProvided;
-
-        const grossProfit = saleProfitBeforeTax * (investor.participation / 100);
-        
-        const taxAmount = investor.type === 'individual' 
-            ? calculateIrpf(grossProfit) 
-            : (grossProfit > 0 ? grossProfit * CORPORATE_TAX_RATE : 0);
-            
+    // 6. Investor Breakdown
+    const investorBreakdown: InvestorBreakdown[] = inputs.investors.map(investor => {
+        const participationRatio = investor.participation / 100;
+        const grossProfit = saleProfitBeforeTax * participationRatio;
+        const taxAmount = calculateProfitTax(grossProfit, investor.type);
         const netProfit = grossProfit - taxAmount;
 
+        const loanAmount = inputs.propertyValue * (investor.financingPercentage / 100) * participationRatio;
+        const loanAssociatedCosts = loanAmount * (investor.associatedCostsRate / 100);
+        const capitalProvided = (totalProjectCost * participationRatio) - loanAmount + loanAssociatedCosts;
+        
         return {
             id: investor.id,
             participation: investor.participation,
@@ -132,30 +97,62 @@ export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationR
             taxAmount,
             netProfit,
             capitalProvided,
-            loanAmount
+            loanAmount,
+            loanAssociatedCosts
         };
     });
 
+    const netProfitAfterTax = investorBreakdown.reduce((sum, inv) => sum + inv.netProfit, 0);
 
+    // 7. Rental Yield
+    const grossAnnualRent = inputs.monthlyRent * 12;
+    const annualExpenses = inputs.ibiFee + inputs.insuranceFee + (inputs.cleaningFee * 12);
+    const netAnnualRent = grossAnnualRent - annualExpenses;
+    const grossRentalYield = totalProjectCost > 0 ? (grossAnnualRent / totalProjectCost) * 100 : 0;
+    const netRentalYield = totalProjectCost > 0 ? (netAnnualRent / totalProjectCost) * 100 : 0;
+    
+    const details: CalculationDetails = {
+        propertyValue: inputs.propertyValue,
+        purchaseTax,
+        notaryFees: inputs.notaryFees,
+        registryFees: inputs.registryFees,
+        agencyFees: inputs.agencyFees,
+        realEstateAgencyFees: inputs.realEstateAgencyFees,
+        renovationBaseCost,
+        renovationVat,
+        furnitureBaseCost,
+        furnitureVat: (furnitureBaseCost * renovationVatRate), // Assuming same VAT rate
+        contingencyAmount,
+        generalExpenses: inputs.generalExpenses,
+        technicalFeesBase: inputs.technicalFees,
+        technicalFeesVat,
+        icioTax,
+        supplySetupCost,
+        capitalGainsTax,
+        ceeCost: inputs.ceeCost,
+        notarySaleCost: inputs.notarySaleCost,
+        grossAnnualRent,
+        annualExpenses,
+        netAnnualRent,
+        grossRentalYield,
+        netRentalYield,
+    };
+    
     return {
-        totalPurchaseNet,
-        totalPurchaseTaxes,
-        totalPurchaseCost,
-        totalRenovationNet,
-        totalRenovationTaxes,
-        totalRenovationCost,
-        totalLicensesCost,
-        totalOtherCosts,
         totalProjectCost,
-        saleNetIncome,
-        saleExpenses,
-        saleProfitBeforeTax,
         saleProfitability,
-        annualRentalIncome,
-        annualRentalExpenses,
+        saleProfitBeforeTax,
+        netProfitAfterTax,
+        totalPurchaseCost,
+        totalRenovationCost,
+        totalLicensesCost: icioTax, // Simplified for summary
+        totalOtherCosts: supplySetupCost + inputs.generalExpenses + totalTechnicalFees, // Simplified
         loanAmount: totalLoanAmount,
         loanAssociatedCosts: totalLoanAssociatedCosts,
-        totalCapitalProvided: totalCapitalProvided,
+        totalCapitalProvided,
         investorBreakdown,
+        details,
+        grossRentalYield,
+        netRentalYield,
     };
 };

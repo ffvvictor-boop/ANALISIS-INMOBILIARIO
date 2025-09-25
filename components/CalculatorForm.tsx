@@ -65,8 +65,8 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({ id, label, checked, onCha
 const Section: React.FC<{ title: string; icon: string; children: React.ReactNode; defaultOpen?: boolean }> = ({ title, icon, children, defaultOpen = false }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
-        <details open={isOpen} onToggle={(e) => setIsOpen((e.currentTarget as HTMLDetailsElement).open)} className="bg-gray-50/80 p-4 rounded-lg border border-gray-200">
-            <summary className="cursor-pointer text-lg font-semibold text-gray-700 flex justify-between items-center">
+        <details open={isOpen} onToggle={(e) => setIsOpen((e.currentTarget as HTMLDetailsElement).open)} className="bg-gray-50/80 p-3 sm:p-4 rounded-lg border border-gray-200">
+            <summary className="cursor-pointer text-base sm:text-lg font-semibold text-gray-700 flex justify-between items-center">
                 <span><i className={`${icon} mr-3 text-blue-500`}></i>{title}</span>
                 <i className={`fas fa-chevron-down text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}></i>
             </summary>
@@ -108,8 +108,8 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
     const participationError = totalParticipationRounded !== 100;
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 max-h-[85vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Datos de la Operación</h2>
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-200/80 max-h-[85vh] overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Datos de la Operación</h2>
             <div className="space-y-4">
                 
                 <Section title="Compra del Inmueble" icon="fa-solid fa-file-signature" defaultOpen={true}>
@@ -150,9 +150,9 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                         </select>
                     </div>
                     {inputs.investors.map((investor, index) => (
-                        <div key={investor.id} className="p-4 bg-gray-50 rounded-lg mt-2 space-y-4 border border-gray-200">
+                        <div key={investor.id} className="p-3 sm:p-4 bg-gray-50 rounded-lg mt-2 space-y-4 border border-gray-200">
                             <h4 className="font-semibold text-gray-800 border-b border-gray-200 pb-2">Inversor {index + 1}</h4>
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                 <div>
                                     <label className="block text-xs text-gray-500 mb-1">Participación</label>
                                     <MinimalistInputField id={`participation-${investor.id}`} value={investor.participation} onChange={(e) => onInvestorChange(investor.id, 'participation', e.target.value)} unit="%"/>
@@ -166,7 +166,7 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                                 </div>
                             </div>
                              <h5 className="font-medium text-gray-700 pt-3 text-sm border-t border-gray-100 mt-4">Financiación Inversor {index + 1}</h5>
-                             <div className="grid grid-cols-3 gap-4 pt-2">
+                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-2">
                                 <div>
                                     <label className="block text-xs text-gray-500 mb-1">% Financiación</label>
                                     <MinimalistInputField id={`financingPercentage-${investor.id}`} value={investor.financingPercentage} onChange={(e) => onInvestorChange(investor.id, 'financingPercentage', e.target.value)} unit="%"/>

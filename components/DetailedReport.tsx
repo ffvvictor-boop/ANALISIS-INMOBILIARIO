@@ -26,8 +26,8 @@ const DetailRow: React.FC<DetailRowProps> = ({ label, value, isSubtotal, isTotal
 };
 
 const Section: React.FC<{ title: string; icon: string; children: React.ReactNode }> = ({ title, icon, children }) => (
-    <div className="bg-gray-50/80 p-5 rounded-lg border border-gray-200">
-        <h3 className="text-xl font-bold text-gray-700 mb-4 border-b pb-2"><i className={`${icon} mr-3 text-blue-500`}></i>{title}</h3>
+    <div className="bg-gray-50/80 p-4 sm:p-5 rounded-lg border border-gray-200">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-700 mb-3 sm:mb-4 border-b pb-2"><i className={`${icon} mr-3 text-blue-500`}></i>{title}</h3>
         <div className="space-y-1">{children}</div>
     </div>
 );
@@ -37,8 +37,8 @@ const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDe
     const { details } = result;
 
     return (
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200/80 text-gray-800 space-y-6 max-h-[80vh] overflow-y-auto">
-            <h2 className="text-3xl font-bold text-gray-800">Informe Detallado de la Operación</h2>
+        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-200/80 text-gray-800 space-y-4 sm:space-y-6 max-h-[80vh] overflow-y-auto text-sm sm:text-base">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Informe Detallado de la Operación</h2>
             
             <Section title="Costes de Compra" icon="fa-solid fa-file-invoice-dollar">
                 <DetailRow label="Valor del Inmueble" value={details.propertyValue} />
@@ -82,7 +82,7 @@ const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDe
                 <DetailRow label="Total Gastos de Venta" value={details.capitalGainsTax + details.ceeCost + details.notarySaleCost} isSubtotal />
                 <DetailRow label="BENEFICIO BRUTO (Antes de Impuestos)" value={result.saleProfitBeforeTax} isTotal />
                 <DetailRow label="BENEFICIO NETO (Después de Impuestos)" value={result.netProfitAfterTax} isTotal />
-                <div className="flex justify-around mt-4 pt-4 border-t">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-around mt-4 pt-4 border-t">
                     <div className="text-center">
                         <div className="text-sm text-gray-500">Rentabilidad s/Coste</div>
                         <div className="text-2xl font-bold text-green-600">{formatPercent(result.saleProfitability)}</div>
@@ -98,7 +98,7 @@ const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDe
                 <DetailRow label="Ingresos Anuales Brutos" value={details.grossAnnualRent}/>
                 <DetailRow label="Gastos Anuales (IBI, Seguro, etc.)" value={details.annualExpenses}/>
                 <DetailRow label="Ingresos Anuales Netos" value={details.netAnnualRent} isSubtotal/>
-                <div className="flex justify-around mt-4 pt-4 border-t">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-around mt-4 pt-4 border-t">
                     <div className="text-center">
                         <div className="text-sm text-gray-500">Rentabilidad Bruta Alquiler</div>
                         <div className="text-2xl font-bold text-teal-600">{formatPercent(result.grossRentalYield)}</div>

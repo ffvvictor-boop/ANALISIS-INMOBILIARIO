@@ -121,13 +121,13 @@ const App: React.FC = () => {
     const totalParticipation = inputs.investors.reduce((sum, inv) => sum + inv.participation, 0);
 
     return (
-        <div className="min-h-screen p-4 sm:p-8">
+        <div className="min-h-screen p-2 sm:p-4 md:p-8">
             <main className="max-w-screen-2xl mx-auto">
-                <header className="text-center mb-10">
-                    <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 tracking-tight">
+                <header className="text-center mb-6 sm:mb-10">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 tracking-tight">
                         Analizador de Rentabilidad Inmobiliaria
                     </h1>
-                    <p className="mt-2 text-lg text-gray-600">
+                    <p className="mt-2 text-base sm:text-lg text-gray-600">
                         Evalúa tus proyectos de inversión con todo detalle.
                     </p>
                 </header>

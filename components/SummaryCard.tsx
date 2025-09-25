@@ -32,13 +32,13 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, color, is
     }
 
     return (
-        <div className={`p-5 rounded-xl flex items-center space-x-4 ${backgroundClasses} transition-all duration-300`}>
-            <div className={`text-3xl ${color}`}>
+        <div className={`p-4 sm:p-5 rounded-xl flex items-center space-x-3 sm:space-x-4 ${backgroundClasses} transition-all duration-300`}>
+            <div className={`text-2xl sm:text-3xl ${color}`}>
                 <i className={`${icon}`}></i>
             </div>
             <div>
-                <p className={`text-sm font-medium ${titleClasses}`}>{title}</p>
-                <p className={`text-2xl font-bold ${valueClasses}`}>
+                <p className={`text-xs sm:text-sm font-medium ${titleClasses}`}>{title}</p>
+                <p className={`text-xl sm:text-2xl font-bold ${valueClasses}`}>
                     {formatValue(value, isCurrency)}
                 </p>
             </div>

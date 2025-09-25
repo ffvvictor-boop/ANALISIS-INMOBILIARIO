@@ -20,6 +20,8 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
     const totalParticipationRounded = parseFloat(totalParticipation.toFixed(2));
     const participationError = totalParticipationRounded !== 100;
 
+    const pricePerSqm = inputs.areaSqm > 0 ? inputs.salePrice / inputs.areaSqm : 0;
+
     return (
         <div className="bg-black/20 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-lg border border-white/20 max-h-[85vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
@@ -130,7 +132,14 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
 
                     {projectionTab === 'sale' && (
                         <div className="space-y-4 animate-fade-in">
-                            <InputField id="salePrice" label="Precio de Venta" icon="fa-solid fa-tag" value={inputs.salePrice} onChange={onInputChange} unit="€"/>
+                            <div>
+                                <InputField id="salePrice" label="Precio de Venta" icon="fa-solid fa-tag" value={inputs.salePrice} onChange={onInputChange} unit="€"/>
+                                {pricePerSqm > 0 && (
+                                    <p className="text-right text-sm text-gray-300 mt-1 pr-1">
+                                        {formatCurrency(pricePerSqm)}/m²
+                                    </p>
+                                )}
+                            </div>
                             <InputField id="capitalGainsTaxRate" label="Plusvalía Municipal" icon="fa-solid fa-percent" value={inputs.capitalGainsTaxRate} onChange={onInputChange} unit="%"/>
                             <InputField id="ceeCost" label="Certificado Energético (CEE)" icon="fa-solid fa-leaf" value={inputs.ceeCost} onChange={onInputChange} unit="€"/>
                             <InputField id="notarySaleCost" label="Notaría Venta" icon="fa-solid fa-gavel" value={inputs.notarySaleCost} onChange={onInputChange} unit="€"/>

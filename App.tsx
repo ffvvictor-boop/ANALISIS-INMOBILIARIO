@@ -20,7 +20,7 @@ const App: React.FC = () => {
 
 
     return (
-        <div className="min-h-screen p-2 sm:p-4 md:p-8">
+        <div className="min-h-screen p-1.5 sm:p-3 md:p-6">
             <main className="max-w-screen-2xl mx-auto">
                 <header className="text-center mb-6 sm:mb-10">
                     <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">

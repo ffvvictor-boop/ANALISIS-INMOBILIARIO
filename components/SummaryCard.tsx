@@ -35,7 +35,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, colorClas
             </div>
             <div>
                 <p className="text-sm text-gray-200">{title}</p>
-                <p className={`text-2xl font-bold ${highlight ? 'text-white' : 'text-white'}`}>{value}</p>
+                <p className={`text-xl sm:text-2xl font-bold ${highlight ? 'text-white' : 'text-white'}`}>{value}</p>
                 {subTitle && subValue && (
                     <div className="flex items-center gap-1.5 mt-1">
                         <p className={`text-xs ${highlight ? 'text-gray-100' : 'text-gray-300'}`}>
@@ -44,7 +44,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, colorClas
                         {subTitleTooltip && (
                             <div className="relative group flex items-center">
                                 <i className="fas fa-info-circle text-gray-400 cursor-pointer text-xs"></i>
-                                <div className="absolute bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 shadow-lg border border-white/10 left-1/2 -translate-x-1/2">
+                                <div className="absolute bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-lg py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 shadow-lg border border-white/10 left-1/2 -translate-x-1/2">
                                     {subTitleTooltip}
                                 </div>
                             </div>

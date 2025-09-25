@@ -17,7 +17,7 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result, inputs }) => {
 
     return (
         <div className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <SummaryCard 
                     title="Beneficio Neto Total"
                     value={formatCurrency(result.netProfitAfterTax)}

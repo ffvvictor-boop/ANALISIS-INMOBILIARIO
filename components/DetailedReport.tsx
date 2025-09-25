@@ -72,7 +72,7 @@ const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDe
                 <DetailRow label={`ICIO (${inputs.icioRate}%)`} value={details.icioTax} indent isPdf={isPdf}/>
                 <DetailRow label="Alta de Suministros" value={details.supplySetupCost} indent isPdf={isPdf}/>
                 <DetailRow label="Total Reforma y Acondicionamiento" value={result.totalRenovationCost} isSubtotal isPdf={isPdf}/>
-            </section>
+            </Section>
 
             <Section title="Resumen de Inversión Total" icon="fa-solid fa-sack-xmark" isPdf={isPdf}>
                  <DetailRow label="Total Costes de Compra" value={result.totalPurchaseCost} isPdf={isPdf}/>

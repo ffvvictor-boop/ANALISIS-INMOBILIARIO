@@ -12,9 +12,11 @@ interface DealFormProps {
     onAnalyze: () => void;
     totalParticipation: number;
     result: CalculationResult | null;
+    onIdealistaSearch: () => void;
+    isSearchingIdealista: boolean;
 }
 
-const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorChange, onInvestorCountChange, onReset, onAnalyze, totalParticipation, result }) => {
+const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorChange, onInvestorCountChange, onReset, onAnalyze, totalParticipation, result, onIdealistaSearch, isSearchingIdealista }) => {
     
     const [projectionTab, setProjectionTab] = useState<'sale' | 'rent'>('sale');
     const totalParticipationRounded = parseFloat(totalParticipation.toFixed(2));
@@ -37,16 +39,36 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
             <div className="space-y-4">
                 
                 <Section title="Compra del Inmueble" icon="fa-solid fa-file-signature" defaultOpen={true}>
-                    <InputField id="propertyValue" label="Valor del Inmueble" icon="fa-solid fa-euro-sign" value={inputs.propertyValue} onChange={onInputChange} unit="€" />
+                    <div className="space-y-2">
+                        <InputField id="propertyAddress" label="Dirección del Inmueble" type="text" icon="fa-solid fa-map-marker-alt" value={inputs.propertyAddress} onChange={onInputChange} />
+                         <button
+                            onClick={onIdealistaSearch}
+                            disabled={isSearchingIdealista || !inputs.propertyAddress}
+                            className="w-full bg-teal-600/80 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-600 transition-all duration-300 text-sm disabled:bg-gray-500/50 disabled:cursor-not-allowed flex items-center justify-center"
+                            aria-label="Buscar datos de mercado en Idealista"
+                        >
+                            {isSearchingIdealista ? (
+                                <>
+                                    <i className="fas fa-spinner fa-spin mr-2"></i> Buscando...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fas fa-search-location mr-2"></i> Buscar en Idealista
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    <hr className="border-white/10 my-4" />
+                    <InputField id="propertyValue" label="Valor del Inmueble" type="number" icon="fa-solid fa-euro-sign" value={inputs.propertyValue} onChange={onInputChange} unit="€" />
                     <SelectField id="purchaseTaxType" label="Impuesto de Compra" icon="fa-solid fa-percent" value={inputs.purchaseTaxType} onChange={onInputChange} options={[
                         { value: 'itp_10', label: 'ITP (10%)' },
                         { value: 'itp_6', label: 'ITP Reducido <35 (6%)' },
                         { value: 'iva_21', label: 'IVA (21%)' }
                     ]}/>
-                    <InputField id="notaryFees" label="Notaría" icon="fa-solid fa-gavel" value={inputs.notaryFees} onChange={onInputChange} unit="€" />
-                    <InputField id="registryFees" label="Registro" icon="fa-solid fa-book" value={inputs.registryFees} onChange={onInputChange} unit="€" />
-                    <InputField id="agencyFees" label="Gestoría" icon="fa-solid fa-briefcase" value={inputs.agencyFees} onChange={onInputChange} unit="€" />
-                    <InputField id="realEstateAgencyFees" label="Honorarios Inmobiliaria" icon="fa-solid fa-handshake" value={inputs.realEstateAgencyFees} onChange={onInputChange} unit="€" />
+                    <InputField id="notaryFees" label="Notaría" type="number" icon="fa-solid fa-gavel" value={inputs.notaryFees} onChange={onInputChange} unit="€" />
+                    <InputField id="registryFees" label="Registro" type="number" icon="fa-solid fa-book" value={inputs.registryFees} onChange={onInputChange} unit="€" />
+                    <InputField id="agencyFees" label="Gestoría" type="number" icon="fa-solid fa-briefcase" value={inputs.agencyFees} onChange={onInputChange} unit="€" />
+                    <InputField id="realEstateAgencyFees" label="Honorarios Inmobiliaria" type="number" icon="fa-solid fa-handshake" value={inputs.realEstateAgencyFees} onChange={onInputChange} unit="€" />
                 </Section>
 
                 <Section title="Suministros" icon="fa-solid fa-lightbulb">
@@ -56,14 +78,14 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                 </Section>
 
                 <Section title="Reforma y Licencias" icon="fa-solid fa-person-digging">
-                    <InputField id="areaSqm" label="Superficie" icon="fa-solid fa-ruler-combined" value={inputs.areaSqm} onChange={onInputChange} unit="m²"/>
-                    <InputField id="renovationCostPerSqm" label="Coste Reforma/m²" icon="fa-solid fa-euro-sign" value={inputs.renovationCostPerSqm} onChange={onInputChange} unit="€/m²" />
-                    <InputField id="furnitureCostPerSqm" label="Coste Mobiliario/m²" icon="fa-solid fa-couch" value={inputs.furnitureCostPerSqm} onChange={onInputChange} unit="€/m²"/>
-                    <InputField id="contingencyRate" label="Desvíos" icon="fa-solid fa-percent" value={inputs.contingencyRate} onChange={onInputChange} unit="%"/>
-                    <InputField id="generalExpenses" label="Gastos Generales" icon="fa-solid fa-file-invoice" value={inputs.generalExpenses} onChange={onInputChange} unit="€"/>
-                    <InputField id="technicalFees" label="Honorarios Técnicos (+21% IVA)" icon="fa-solid fa-helmet-safety" value={inputs.technicalFees} onChange={onInputChange} unit="€"/>
+                    <InputField id="areaSqm" label="Superficie" type="number" icon="fa-solid fa-ruler-combined" value={inputs.areaSqm} onChange={onInputChange} unit="m²"/>
+                    <InputField id="renovationCostPerSqm" label="Coste Reforma/m²" type="number" icon="fa-solid fa-euro-sign" value={inputs.renovationCostPerSqm} onChange={onInputChange} unit="€/m²" />
+                    <InputField id="furnitureCostPerSqm" label="Coste Mobiliario/m²" type="number" icon="fa-solid fa-couch" value={inputs.furnitureCostPerSqm} onChange={onInputChange} unit="€/m²"/>
+                    <InputField id="contingencyRate" label="Desvíos" type="number" icon="fa-solid fa-percent" value={inputs.contingencyRate} onChange={onInputChange} unit="%"/>
+                    <InputField id="generalExpenses" label="Gastos Generales" type="number" icon="fa-solid fa-file-invoice" value={inputs.generalExpenses} onChange={onInputChange} unit="€"/>
+                    <InputField id="technicalFees" label="Honorarios Técnicos (+21% IVA)" type="number" icon="fa-solid fa-helmet-safety" value={inputs.technicalFees} onChange={onInputChange} unit="€"/>
                     <SelectField id="renovationVatType" label="IVA Reforma" icon="fa-solid fa-percent" value={inputs.renovationVatType} onChange={onInputChange} options={[ { value: '10', label: 'IVA (10%)' }, { value: '21', label: 'IVA (21%)' }, { value: 'none', label: 'Sin IVA' } ]}/>
-                    <InputField id="icioRate" label="ICIO" icon="fa-solid fa-percent" value={inputs.icioRate} onChange={onInputChange} unit="%"/>
+                    <InputField id="icioRate" label="ICIO" type="number" icon="fa-solid fa-percent" value={inputs.icioRate} onChange={onInputChange} unit="%"/>
                 </Section>
 
                 <Section title="Inversores" icon="fa-solid fa-users">
@@ -133,16 +155,16 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                     {projectionTab === 'sale' && (
                         <div className="space-y-4 animate-fade-in">
                             <div>
-                                <InputField id="salePrice" label="Precio de Venta" icon="fa-solid fa-tag" value={inputs.salePrice} onChange={onInputChange} unit="€"/>
+                                <InputField id="salePrice" label="Precio de Venta" type="number" icon="fa-solid fa-tag" value={inputs.salePrice} onChange={onInputChange} unit="€"/>
                                 {pricePerSqm > 0 && (
                                     <p className="text-right text-sm text-gray-300 mt-1 pr-1">
                                         {formatCurrency(pricePerSqm)}/m²
                                     </p>
                                 )}
                             </div>
-                            <InputField id="capitalGainsTaxRate" label="Plusvalía Municipal" icon="fa-solid fa-percent" value={inputs.capitalGainsTaxRate} onChange={onInputChange} unit="%"/>
-                            <InputField id="ceeCost" label="Certificado Energético (CEE)" icon="fa-solid fa-leaf" value={inputs.ceeCost} onChange={onInputChange} unit="€"/>
-                            <InputField id="notarySaleCost" label="Notaría Venta" icon="fa-solid fa-gavel" value={inputs.notarySaleCost} onChange={onInputChange} unit="€"/>
+                            <InputField id="capitalGainsTaxRate" label="Plusvalía Municipal" type="number" icon="fa-solid fa-percent" value={inputs.capitalGainsTaxRate} onChange={onInputChange} unit="%"/>
+                            <InputField id="ceeCost" label="Certificado Energético (CEE)" type="number" icon="fa-solid fa-leaf" value={inputs.ceeCost} onChange={onInputChange} unit="€"/>
+                            <InputField id="notarySaleCost" label="Notaría Venta" type="number" icon="fa-solid fa-gavel" value={inputs.notarySaleCost} onChange={onInputChange} unit="€"/>
                         </div>
                     )}
                     
@@ -153,17 +175,17 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                                 <TabButton label="Por Habitaciones" icon="fa-bed" isActive={inputs.rentalType === 'rooms'} onClick={() => onInputChange({ target: { name: 'rentalType', value: 'rooms', type: 'select' } as any })} />
                             </div>
                             {inputs.rentalType === 'traditional' ? (
-                                <InputField id="monthlyRent" label="Alquiler Mensual" icon="fa-solid fa-calendar-days" value={inputs.monthlyRent} onChange={onInputChange} unit="€"/>
+                                <InputField id="monthlyRent" label="Alquiler Mensual" type="number" icon="fa-solid fa-calendar-days" value={inputs.monthlyRent} onChange={onInputChange} unit="€"/>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <InputField id="numberOfRooms" label="Nº Habitaciones" icon="fa-solid fa-hashtag" value={inputs.numberOfRooms} onChange={onInputChange} unit="hab." step="1"/>
-                                    <InputField id="rentPerRoom" label="Alquiler/hab." icon="fa-solid fa-euro-sign" value={inputs.rentPerRoom} onChange={onInputChange} unit="€/mes"/>
+                                    <InputField id="numberOfRooms" label="Nº Habitaciones" type="number" icon="fa-solid fa-hashtag" value={inputs.numberOfRooms} onChange={onInputChange} unit="hab." step="1"/>
+                                    <InputField id="rentPerRoom" label="Alquiler/hab." type="number" icon="fa-solid fa-euro-sign" value={inputs.rentPerRoom} onChange={onInputChange} unit="€/mes"/>
                                 </div>
                             )}
                             <hr className="border-white/10"/>
                             <h4 className="text-md font-semibold text-white pt-2">Gastos Anuales Alquiler</h4>
-                            <InputField id="ibiFee" label="IBI Anual" icon="fa-solid fa-file-invoice-dollar" value={inputs.ibiFee} onChange={onInputChange} unit="€"/>
-                            <InputField id="insuranceFee" label="Seguro Anual" icon="fa-solid fa-shield-halved" value={inputs.insuranceFee} onChange={onInputChange} unit="€"/>
+                            <InputField id="ibiFee" label="IBI Anual" type="number" icon="fa-solid fa-file-invoice-dollar" value={inputs.ibiFee} onChange={onInputChange} unit="€"/>
+                            <InputField id="insuranceFee" label="Seguro Anual" type="number" icon="fa-solid fa-shield-halved" value={inputs.insuranceFee} onChange={onInputChange} unit="€"/>
                             <CheckboxField id="includeManagementFee" label="Añadir gastos de gestión (1 mensualidad)" checked={inputs.includeManagementFee} onChange={onInputChange} />
                             <CheckboxField id="includeCleaningFee" label="Añadir gastos de limpieza (30€/mes + IVA)" checked={inputs.includeCleaningFee} onChange={onInputChange} />
                         </div>

@@ -9,20 +9,30 @@ interface InputFieldProps {
     id: string;
     label: string;
     icon: string;
-    value: number | '';
+    value: number | string | '';
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     step?: string;
     unit?: string;
+    type?: 'text' | 'number';
 }
 
-export const InputField: React.FC<InputFieldProps> = ({ id, label, icon, value, onChange, step = "0.01", unit = '' }) => (
+export const InputField: React.FC<InputFieldProps> = ({ id, label, icon, value, onChange, step = "0.01", unit = '', type = 'text' }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-gray-200 mb-1">{label}</label>
         <div className="relative">
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                 <i className={`${icon} text-gray-300`}></i>
             </div>
-            <input type="number" id={id} name={id} value={value} onChange={onChange} step={step} className="w-full pl-10 pr-12 py-2 bg-white/10 text-white border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 placeholder-gray-300" placeholder="0"/>
+            <input 
+                type={type} 
+                id={id} 
+                name={id} 
+                value={value} 
+                onChange={onChange} 
+                step={type === 'number' ? step : undefined} 
+                className="w-full pl-10 pr-12 py-2 bg-white/10 text-white border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-200 placeholder-gray-300" 
+                placeholder={type === 'number' ? '0' : 'Introduce un valor...'}
+            />
             {unit && <span className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-200 text-sm">{unit}</span>}
         </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { RealEstateDealInput, CalculationResult, Investor } from '../types';
+import { RealEstateDealInput, CalculationResult, Investor, IdealistaData, IdealistaDataSchema } from '../types';
 import { analyzeRealEstateDeal } from '../services/calculatorService';
+import { GoogleGenAI } from "@google/genai";
 
 const initialInvestors: Investor[] = [{ 
     id: 1, 
@@ -12,6 +13,7 @@ const initialInvestors: Investor[] = [{
 }];
 
 const initialInputs: RealEstateDealInput = {
+    propertyAddress: '',
     propertyValue: 110000,
     purchaseTaxType: 'itp_10',
     notaryFees: 600,
@@ -47,6 +49,9 @@ const initialInputs: RealEstateDealInput = {
 export const useDealCalculator = () => {
     const [inputs, setInputs] = useState<RealEstateDealInput>(initialInputs);
     const [result, setResult] = useState<CalculationResult | null>(null);
+    const [idealistaData, setIdealistaData] = useState<IdealistaData | null>(null);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState<string | null>(null);
 
     const handleAnalyze = useCallback(() => {
         const calculatedResult = analyzeRealEstateDeal(inputs);
@@ -120,10 +125,44 @@ export const useDealCalculator = () => {
             return { ...prev, investors: newInvestors };
         });
     }, []);
+
+    const handleIdealistaSearch = useCallback(async () => {
+        if (!inputs.propertyAddress) return;
+        
+        setIsSearching(true);
+        setSearchError(null);
+        setIdealistaData(null);
+
+        try {
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+            const prompt = `Basado en los datos más recientes de Idealista.com para la dirección '${inputs.propertyAddress}', proporciona el precio medio por metro cuadrado en esa zona específica. Además, encuentra entre 3 y 5 anuncios de venta de inmuebles similares (pisos o casas) cerca de esa dirección. Para cada anuncio, facilita una breve descripción, el precio, la superficie en m² y la URL directa al anuncio en Idealista. Devuelve la respuesta como un objeto JSON estructurado.`;
+            
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    responseSchema: IdealistaDataSchema,
+                },
+            });
+
+            const data = JSON.parse(response.text);
+            setIdealistaData(data);
+
+        } catch (error) {
+            console.error("Error al buscar datos en Idealista:", error);
+            setSearchError("No se pudieron obtener los datos. Por favor, intenta de nuevo o modifica la dirección.");
+        } finally {
+            setIsSearching(false);
+        }
+
+    }, [inputs.propertyAddress]);
     
     const handleReset = useCallback(() => {
         setInputs(initialInputs);
         setResult(null);
+        setIdealistaData(null);
+        setSearchError(null);
     }, []);
 
     const totalParticipation = inputs.investors.reduce((sum, inv) => sum + inv.participation, 0);
@@ -136,6 +175,10 @@ export const useDealCalculator = () => {
         handleInvestorCountChange,
         handleReset,
         handleAnalyze,
-        totalParticipation
+        totalParticipation,
+        handleIdealistaSearch,
+        idealistaData,
+        isSearching,
+        searchError
     };
 };

@@ -35,7 +35,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, colorClas
             </div>
             <div>
                 <p className="text-sm text-gray-200">{title}</p>
-                <p className={`text-xl sm:text-2xl font-bold ${highlight ? 'text-white' : 'text-white'}`}>{value}</p>
+                <p className={`text-2xl sm:text-xl font-bold ${highlight ? 'text-white' : 'text-white'}`}>{value}</p>
                 {subTitle && subValue && (
                     <div className="flex items-center gap-1.5 mt-1">
                         <p className={`text-xs ${highlight ? 'text-gray-100' : 'text-gray-300'}`}>

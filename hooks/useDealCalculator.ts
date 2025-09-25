@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { RealEstateDealInput, CalculationResult, Investor, IdealistaData, IdealistaDataSchema } from '../types';
+import { RealEstateDealInput, CalculationResult, Investor, IdealistaData } from '../types';
 import { analyzeRealEstateDeal } from '../services/calculatorService';
-import { GoogleGenAI } from "@google/genai";
 
 const initialInvestors: Investor[] = [{ 
     id: 1, 
@@ -128,37 +127,44 @@ export const useDealCalculator = () => {
 
     const handleIdealistaSearch = useCallback(async () => {
         if (!inputs.propertyAddress) return;
-        
+
+        const WORKER_URL = 'https://chatgpt-proxy.ffv-victor.workers.dev/';
+
         setIsSearching(true);
         setSearchError(null);
         setIdealistaData(null);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-            const prompt = `Actúa como un experto inmobiliario. Tu tarea es encontrar dos datos clave sobre la dirección '${inputs.propertyAddress}' usando Idealista.com:
-1. El precio medio actual por metro cuadrado (€/m²) en esa zona específica.
-2. La URL exacta y funcional del mapa de precios de Idealista para esa dirección (por ejemplo, 'https://www.idealista.com/maps/elche-elx-alicante/calle-dr-caro/').
-Devuelve únicamente un objeto JSON con estos dos datos. No incluyas listados de propiedades individuales ni ningún otro texto.`;
-            
-            const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: prompt,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: IdealistaDataSchema,
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({ address: inputs.propertyAddress }),
             });
 
-            const data = JSON.parse(response.text);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Error de comunicación con el servidor.' }));
+                throw new Error(errorData.message || `Error del servidor: ${response.status}`);
+            }
+
+            const data: IdealistaData = await response.json();
+            
+            // Validación simple para asegurar que la respuesta tiene la estructura esperada.
+            if (typeof data.averagePricePerSqm !== 'number' || typeof data.idealistaMapUrl !== 'string') {
+                console.error("Respuesta inesperada del worker:", data);
+                throw new Error("La respuesta del servidor no tiene el formato esperado.");
+            }
+
             setIdealistaData(data);
 
         } catch (error) {
-            console.error("Error al buscar datos en Idealista:", error);
-            setSearchError("No se pudieron obtener los datos. Por favor, intenta de nuevo o modifica la dirección.");
+            console.error("Error al buscar datos a través del worker:", error);
+            const errorMessage = error instanceof Error ? error.message : "No se pudieron obtener los datos. Por favor, intenta de nuevo.";
+            setSearchError(errorMessage);
         } finally {
             setIsSearching(false);
         }
-
     }, [inputs.propertyAddress]);
     
     const handleReset = useCallback(() => {

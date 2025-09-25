@@ -86,6 +86,14 @@ export interface CalculationDetails {
     netRentalYield: number;
 }
 
+export interface RentalAnalysis {
+    grossAnnualRent: number;
+    annualExpenses: number;
+    netAnnualRent: number;
+    grossRentalYield: number;
+    netRentalYield: number;
+}
+
 export interface CalculationResult {
     totalProjectCost: number;
     saleProfitability: number; // on cost
@@ -104,7 +112,13 @@ export interface CalculationResult {
     investorBreakdown: InvestorBreakdown[];
     details: CalculationDetails;
 
-    // Rental
+    // For summary card (based on selection)
     grossRentalYield: number;
     netRentalYield: number;
+    
+    // For detailed report
+    rentalAnalysis: {
+        traditional: RentalAnalysis;
+        byRooms: RentalAnalysis;
+    };
 }

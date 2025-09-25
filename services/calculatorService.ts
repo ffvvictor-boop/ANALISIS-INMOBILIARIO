@@ -1,4 +1,4 @@
-import { RealEstateDealInput, CalculationResult, InvestorBreakdown, CalculationDetails } from '../types';
+import { RealEstateDealInput, CalculationResult, InvestorBreakdown, CalculationDetails, RentalAnalysis } from '../types';
 
 const SUPPLY_SETUP_FEE = 250;
 const VAT_RATE = 0.21;
@@ -33,6 +33,34 @@ const calculateProfitTax = (profit: number, type: 'individual' | 'company'): num
     return (6000 * 0.19) + (44000 * 0.21) + (150000 * 0.23) + ((profit - 200000) * 0.26);
 };
 
+const calculateRentalScenario = (
+    inputs: RealEstateDealInput, 
+    totalProjectCost: number, 
+    scenario: 'traditional' | 'rooms'
+): RentalAnalysis => {
+    const totalMonthlyRent = scenario === 'traditional'
+        ? inputs.monthlyRent
+        : (inputs.numberOfRooms * inputs.rentPerRoom);
+
+    const managementFee = inputs.includeManagementFee ? totalMonthlyRent : 0;
+    const cleaningAnnualFee = inputs.includeCleaningFee ? CLEANING_FEE_MONTHLY_VAT_INCLUDED * 12 : 0;
+    const baseAnnualExpenses = inputs.ibiFee + inputs.insuranceFee;
+
+    const grossAnnualRent = totalMonthlyRent * 12;
+    const annualExpenses = baseAnnualExpenses + managementFee + cleaningAnnualFee;
+    const netAnnualRent = grossAnnualRent - annualExpenses;
+    
+    const grossRentalYield = totalProjectCost > 0 ? (grossAnnualRent / totalProjectCost) * 100 : 0;
+    const netRentalYield = totalProjectCost > 0 ? (netAnnualRent / totalProjectCost) * 100 : 0;
+
+    return {
+        grossAnnualRent,
+        annualExpenses,
+        netAnnualRent,
+        grossRentalYield,
+        netRentalYield
+    };
+};
 
 export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationResult => {
     // 1. Purchase Costs
@@ -105,20 +133,11 @@ export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationR
 
     const netProfitAfterTax = investorBreakdown.reduce((sum, inv) => sum + inv.netProfit, 0);
 
-    // 7. Rental Yield
-    const totalMonthlyRent = inputs.rentalType === 'traditional'
-        ? inputs.monthlyRent
-        : (inputs.numberOfRooms * inputs.rentPerRoom);
+    // 7. Rental Yield Analysis
+    const rentalAnalysisTraditional = calculateRentalScenario(inputs, totalProjectCost, 'traditional');
+    const rentalAnalysisByRooms = calculateRentalScenario(inputs, totalProjectCost, 'rooms');
+    const selectedRentalAnalysis = inputs.rentalType === 'traditional' ? rentalAnalysisTraditional : rentalAnalysisByRooms;
 
-    const managementFee = inputs.includeManagementFee ? totalMonthlyRent : 0;
-    const cleaningAnnualFee = inputs.includeCleaningFee ? CLEANING_FEE_MONTHLY_VAT_INCLUDED * 12 : 0;
-
-    const grossAnnualRent = totalMonthlyRent * 12;
-    const annualExpenses = inputs.ibiFee + inputs.insuranceFee + managementFee + cleaningAnnualFee;
-    const netAnnualRent = grossAnnualRent - annualExpenses;
-    const grossRentalYield = totalProjectCost > 0 ? (grossAnnualRent / totalProjectCost) * 100 : 0;
-    const netRentalYield = totalProjectCost > 0 ? (netAnnualRent / totalProjectCost) * 100 : 0;
-    
     const details: CalculationDetails = {
         propertyValue: inputs.propertyValue,
         purchaseTax,
@@ -129,7 +148,7 @@ export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationR
         renovationBaseCost,
         renovationVat,
         furnitureBaseCost,
-        furnitureVat: (furnitureBaseCost * renovationVatRate), // Assuming same VAT rate
+        furnitureVat: (furnitureBaseCost * renovationVatRate),
         contingencyAmount,
         generalExpenses: inputs.generalExpenses,
         technicalFeesBase: inputs.technicalFees,
@@ -139,11 +158,11 @@ export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationR
         capitalGainsTax,
         ceeCost: inputs.ceeCost,
         notarySaleCost: inputs.notarySaleCost,
-        grossAnnualRent,
-        annualExpenses,
-        netAnnualRent,
-        grossRentalYield,
-        netRentalYield,
+        grossAnnualRent: selectedRentalAnalysis.grossAnnualRent,
+        annualExpenses: selectedRentalAnalysis.annualExpenses,
+        netAnnualRent: selectedRentalAnalysis.netAnnualRent,
+        grossRentalYield: selectedRentalAnalysis.grossRentalYield,
+        netRentalYield: selectedRentalAnalysis.netRentalYield,
     };
     
     return {
@@ -153,14 +172,18 @@ export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationR
         netProfitAfterTax,
         totalPurchaseCost,
         totalRenovationCost,
-        totalLicensesCost: icioTax, // Simplified for summary
-        totalOtherCosts: supplySetupCost + inputs.generalExpenses + totalTechnicalFees, // Simplified
+        totalLicensesCost: icioTax,
+        totalOtherCosts: supplySetupCost + inputs.generalExpenses + totalTechnicalFees,
         loanAmount: totalLoanAmount,
         loanAssociatedCosts: totalLoanAssociatedCosts,
         totalCapitalProvided,
         investorBreakdown,
         details,
-        grossRentalYield,
-        netRentalYield,
+        grossRentalYield: selectedRentalAnalysis.grossRentalYield,
+        netRentalYield: selectedRentalAnalysis.netRentalYield,
+        rentalAnalysis: {
+            traditional: rentalAnalysisTraditional,
+            byRooms: rentalAnalysisByRooms
+        }
     };
 };

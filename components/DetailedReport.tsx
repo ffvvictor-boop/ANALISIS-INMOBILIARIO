@@ -1,5 +1,6 @@
 import React from 'react';
 import { CalculationResult, RealEstateDealInput } from '../types';
+import Section from './ui/Section';
 
 interface DetailRowProps {
     label: string;
@@ -29,16 +30,9 @@ const DetailRow: React.FC<DetailRowProps> = ({ label, value, isSubtotal, isTotal
     )
 };
 
-const Section: React.FC<{ title: string; icon: string; children: React.ReactNode; isPdf?: boolean }> = ({ title, icon, children, isPdf }) => (
-    <div className={isPdf ? 'bg-gray-50 p-4 rounded-lg border border-gray-200' : 'bg-white/5 backdrop-blur-sm p-4 sm:p-5 rounded-lg border border-white/10'}>
-        <h3 className={`text-lg sm:text-xl font-bold ${isPdf ? 'text-gray-700 border-gray-200' : 'text-white border-white/10'} mb-3 sm:mb-4 border-b pb-2`}><i className={`${icon} mr-3 ${isPdf ? 'text-blue-500' : 'text-blue-400'}`}></i>{title}</h3>
-        <div className="space-y-1">{children}</div>
-    </div>
-);
-
-
 const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDealInput; isPdf?: boolean }> = ({ result, inputs, isPdf = false }) => {
-    const { details } = result;
+    const { details, rentalAnalysis } = result;
+    const { traditional: traditionalAnalysis, byRooms: roomsAnalysis } = rentalAnalysis;
 
     const containerClasses = isPdf
         ? "bg-white p-8 text-gray-800 space-y-6 text-base"
@@ -108,17 +102,35 @@ const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDe
             </Section>
             
             <Section title="Análisis de Alquiler" icon="fa-solid fa-house-user" isPdf={isPdf}>
-                <DetailRow label="Ingresos Anuales Brutos" value={details.grossAnnualRent} isPdf={isPdf}/>
-                <DetailRow label="Gastos Anuales (IBI, Seguro, etc.)" value={details.annualExpenses} isPdf={isPdf}/>
-                <DetailRow label="Ingresos Anuales Netos" value={details.netAnnualRent} isSubtotal isPdf={isPdf}/>
-                <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-around mt-4 pt-4 border-t border-white/10">
+                <DetailRow isSubHeader label="Modalidad: Alquiler Tradicional" value={0} isPdf={isPdf}/>
+                <DetailRow label="Ingresos Anuales Brutos" value={traditionalAnalysis.grossAnnualRent} isPdf={isPdf}/>
+                <DetailRow label="Gastos Anuales Totales" value={traditionalAnalysis.annualExpenses} isPdf={isPdf}/>
+                <DetailRow label="Ingresos Anuales Netos" value={traditionalAnalysis.netAnnualRent} isSubtotal isPdf={isPdf}/>
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-around mt-3 pt-3 border-t border-white/10">
                     <div className="text-center">
-                        <div className={`text-sm ${textColor}`}>Rentabilidad Bruta Alquiler</div>
-                        <div className={`text-2xl font-bold ${accentTealColor}`}>{formatPercent(result.grossRentalYield)}</div>
+                        <div className={`text-sm ${textColor}`}>Rentabilidad Bruta</div>
+                        <div className={`text-xl font-bold ${accentTealColor}`}>{formatPercent(traditionalAnalysis.grossRentalYield)}</div>
                     </div>
                      <div className="text-center">
-                        <div className={`text-sm ${textColor}`}>Rentabilidad Neta Alquiler</div>
-                        <div className={`text-2xl font-bold ${accentTealColor}`}>{formatPercent(result.netRentalYield)}</div>
+                        <div className={`text-sm ${textColor}`}>Rentabilidad Neta</div>
+                        <div className={`text-xl font-bold ${accentTealColor}`}>{formatPercent(traditionalAnalysis.netRentalYield)}</div>
+                    </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-white/10">
+                    <DetailRow isSubHeader label="Modalidad: Alquiler por Habitaciones" value={0} isPdf={isPdf}/>
+                    <DetailRow label="Ingresos Anuales Brutos" value={roomsAnalysis.grossAnnualRent} isPdf={isPdf}/>
+                    <DetailRow label="Gastos Anuales Totales" value={roomsAnalysis.annualExpenses} isPdf={isPdf}/>
+                    <DetailRow label="Ingresos Anuales Netos" value={roomsAnalysis.netAnnualRent} isSubtotal isPdf={isPdf}/>
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 justify-around mt-3 pt-3 border-t border-white/10">
+                        <div className="text-center">
+                            <div className={`text-sm ${textColor}`}>Rentabilidad Bruta</div>
+                            <div className={`text-xl font-bold ${accentTealColor}`}>{formatPercent(roomsAnalysis.grossRentalYield)}</div>
+                        </div>
+                         <div className="text-center">
+                            <div className={`text-sm ${textColor}`}>Rentabilidad Neta</div>
+                            <div className={`text-xl font-bold ${accentTealColor}`}>{formatPercent(roomsAnalysis.netRentalYield)}</div>
+                        </div>
                     </div>
                 </div>
             </Section>

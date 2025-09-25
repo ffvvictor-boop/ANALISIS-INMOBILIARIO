@@ -1,5 +1,5 @@
 {
-  "name": "Analizador de Rentabilidad Inmobiliaria",
+  "name": "AO HOME",
   "description": "Una aplicación web para analizar la viabilidad y rentabilidad de operaciones de inversión inmobiliaria (compra, reforma y venta/alquiler) con generación de informes en PDF.",
   "requestFramePermissions": []
 }

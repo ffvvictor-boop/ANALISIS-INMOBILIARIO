@@ -65,7 +65,7 @@ const CheckboxField: React.FC<CheckboxFieldProps> = ({ id, label, checked, onCha
 const Section: React.FC<{ title: string; icon: string; children: React.ReactNode; defaultOpen?: boolean }> = ({ title, icon, children, defaultOpen = false }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     return (
-        <details open={isOpen} onToggle={(e) => setIsOpen((e.currentTarget as HTMLDetailsElement).open)} className="bg-gray-50/80 p-3 sm:p-4 rounded-lg border border-gray-200">
+        <details open={isOpen} onToggle={(e) => setIsOpen((e.currentTarget as HTMLDetailsElement).open)} className="bg-white p-3 sm:p-4 rounded-lg border border-gray-200/80">
             <summary className="cursor-pointer text-base sm:text-lg font-semibold text-gray-700 flex justify-between items-center">
                 <span><i className={`${icon} mr-3 text-blue-500`}></i>{title}</span>
                 <i className={`fas fa-chevron-down text-gray-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}></i>
@@ -108,7 +108,7 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
     const participationError = totalParticipationRounded !== 100;
 
     return (
-        <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-200/80 max-h-[85vh] overflow-y-auto">
+        <div className="bg-gray-100 p-4 sm:p-6 rounded-2xl shadow-lg max-h-[85vh] overflow-y-auto">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Datos de la Operación</h2>
             <div className="space-y-4">
                 
@@ -201,12 +201,6 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
                     <InputField id="insuranceFee" label="Seguro Anual" icon="fa-solid fa-shield-halved" value={inputs.insuranceFee} onChange={onInputChange} unit="€"/>
                     <InputField id="cleaningFee" label="Limpieza Mensual" icon="fa-solid fa-broom" value={inputs.cleaningFee} onChange={onInputChange} unit="€"/>
                 </Section>
-
-                <div className="pt-4">
-                     <button type="button" onClick={onReset} className="w-full bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-transform transform hover:scale-105 duration-300">
-                        <i className="fas fa-undo mr-2"></i> Reiniciar
-                    </button>
-                </div>
             </div>
         </div>
     );

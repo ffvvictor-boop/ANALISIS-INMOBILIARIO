@@ -1,6 +1,9 @@
 import React, { useRef } from 'react';
-import { CalculationResult } from '../types';
+import ReactDOMClient from 'react-dom/client';
+import { CalculationResult, RealEstateDealInput } from '../types';
 import SummaryCard from './SummaryCard';
+import DetailedReport from './DetailedReport';
+
 
 // @ts-ignore
 const { jsPDF } = window.jspdf;
@@ -10,37 +13,87 @@ const { html2canvas } = window;
 
 interface ReportDisplayProps {
     result: CalculationResult;
+    inputs: RealEstateDealInput;
 }
 
 const formatCurrency = (value: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
 const formatPercent = (value: number) => `${value.toFixed(2)}%`;
 
-const DetailRow: React.FC<{ label: string; value: string; isTotal?: boolean }> = ({ label, value, isTotal = false }) => (
-    <div className={`flex justify-between py-2.5 px-2 sm:px-3 rounded-md ${isTotal ? 'font-bold text-gray-800 bg-black/10 mt-2' : 'border-b border-black/10'}`}>
-        <span className="text-gray-600">{label}</span>
-        <span className="font-medium text-gray-800">{value}</span>
+const DetailRow: React.FC<{ label: string; value: string; isTotal?: boolean, subtitle?: string }> = ({ label, value, isTotal = false, subtitle }) => (
+    <div className={`flex justify-between items-center py-2.5 px-2 sm:px-3 rounded-md ${isTotal ? 'font-bold text-gray-800 bg-black/10 mt-2' : 'border-b border-black/10'}`}>
+        <div>
+            <span className="text-gray-600">{label}</span>
+            {subtitle && <span className="block text-xs text-gray-500">{subtitle}</span>}
+        </div>
+        <span className="font-medium text-gray-800 text-right">{value}</span>
     </div>
 );
 
-const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
+const ReportDisplay: React.FC<ReportDisplayProps> = ({ result, inputs }) => {
     const reportRef = useRef<HTMLDivElement>(null);
 
-    const handleDownloadPdf = () => {
+    const handleDownloadPdf = async () => {
         if (!reportRef.current) return;
-        
-        const reportElement = reportRef.current;
-        html2canvas(reportElement, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#ffffff',
-        }).then(canvas => {
+    
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const reportWidth = 1200; // Ancho consistente para renderizar el PDF
+    
+        const addImageToPdf = (canvas: HTMLCanvasElement, isFirstPage: boolean) => {
+            if (!isFirstPage) {
+                pdf.addPage();
+            }
             const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save('informe_rentabilidad_inmobiliaria.pdf');
+            let position = 0;
+            let heightLeft = pdfHeight;
+    
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+            heightLeft -= pageHeight;
+    
+            while (heightLeft > 0) {
+                position -= pageHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                heightLeft -= pageHeight;
+            }
+        };
+    
+        // --- 1. Renderizar y capturar el Resumen ---
+        const summaryContainer = document.createElement('div');
+        summaryContainer.style.position = 'absolute';
+        summaryContainer.style.left = '-9999px';
+        summaryContainer.style.width = `${reportWidth}px`;
+        const summaryClone = reportRef.current.cloneNode(true) as HTMLElement;
+        summaryContainer.appendChild(summaryClone);
+        document.body.appendChild(summaryContainer);
+    
+        const summaryCanvas = await html2canvas(summaryContainer, { scale: 2, backgroundColor: '#ffffff' });
+        document.body.removeChild(summaryContainer);
+    
+        // --- 2. Renderizar y capturar el Informe Detallado ---
+        const detailContainer = document.createElement('div');
+        detailContainer.style.position = 'absolute';
+        detailContainer.style.left = '-9999px';
+        detailContainer.style.width = `${reportWidth}px`;
+        document.body.appendChild(detailContainer);
+        const detailRoot = ReactDOMClient.createRoot(detailContainer);
+    
+        await new Promise<void>(resolve => {
+            detailRoot.render(<DetailedReport result={result} inputs={inputs} />);
+            setTimeout(resolve, 500); // Dar tiempo para el renderizado
         });
+    
+        const detailCanvas = await html2canvas(detailContainer, { scale: 2, backgroundColor: '#ffffff' });
+        detailRoot.unmount();
+        document.body.removeChild(detailContainer);
+    
+        // --- 3. Añadir ambas imágenes al PDF y guardar ---
+        addImageToPdf(summaryCanvas, true);
+        addImageToPdf(detailCanvas, false);
+    
+        pdf.save('informe_ao_home.pdf');
     };
     
     const getHighlight = (value: number): 'green' | 'red' | undefined => {
@@ -84,15 +137,14 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                             <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-3"><i className="fa-solid fa-calculator mr-2 text-amber-500"></i>Desglose de Costes</h3>
-                                <DetailRow label="Coste Compra (Neto + Imp.)" value={formatCurrency(result.totalPurchaseCost)} />
-                                <DetailRow label="Coste Reforma y otros (Neto + Imp.)" value={formatCurrency(result.totalRenovationCost)} />
+                                <DetailRow label="Coste Compra" subtitle="(Neto + Imp.)" value={formatCurrency(result.totalPurchaseCost)} />
+                                <DetailRow label="Coste Reforma y otros" subtitle="(Neto + Imp.)" value={formatCurrency(result.totalRenovationCost)} />
                                 <DetailRow label="COSTE TOTAL" value={formatCurrency(result.totalProjectCost)} isTotal />
                             </div>
                             <div className="bg-gray-50 p-3 sm:p-4 rounded-lg border border-gray-200">
                                 <h3 className="text-lg sm:text-xl font-semibold text-gray-700 mb-3"><i className="fa-solid fa-landmark mr-2 text-amber-500"></i>Financiación y Capital</h3>
-                                <DetailRow label="Importe Financiado (Total)" value={formatCurrency(result.loanAmount)} />
-                                {/* FIX: Changed incorrect function call 'format' to 'formatCurrency' to correctly format the value. */}
-                                <DetailRow label="Costes Asociados Préstamo (Total)" value={formatCurrency(result.loanAssociatedCosts)} />
+                                <DetailRow label="Importe Financiado" subtitle="(Total)" value={formatCurrency(result.loanAmount)} />
+                                <DetailRow label="Costes Asociados Préstamo" subtitle="(Total)" value={formatCurrency(result.loanAssociatedCosts)} />
                                 <DetailRow label="CAPITAL APORTADO TOTAL" value={formatCurrency(result.totalCapitalProvided)} isTotal />
                             </div>
                         </div>
@@ -137,7 +189,7 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
 
                     <footer className="text-center mt-12 text-gray-500 text-xs">
                          <p>Este es un informe de estimación y no constituye asesoramiento financiero o fiscal. Los cálculos de impuestos son simplificados.</p>
-                         <p>&copy; {new Date().getFullYear()} Analizador de Rentabilidad Inmobiliaria. Todos los derechos reservados.</p>
+                         <p>&copy; {new Date().getFullYear()} AO HOME. Todos los derechos reservados.</p>
                     </footer>
                 </div>
             </div>
@@ -145,5 +197,4 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result }) => {
     );
 };
 
-{/* FIX: Added a default export to the ReportDisplay component to resolve the module import error in App.tsx. */}
 export default ReportDisplay;

@@ -125,7 +125,7 @@ const App: React.FC = () => {
             <main className="max-w-screen-2xl mx-auto">
                 <header className="text-center mb-6 sm:mb-10">
                     <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-800 tracking-tight">
-                        Analizador de Rentabilidad Inmobiliaria
+                        AO HOME
                     </h1>
                     <p className="mt-2 text-base sm:text-lg text-gray-600">
                         Evalúa tus proyectos de inversión con todo detalle.
@@ -159,7 +159,7 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
                                 {reportView === 'summary' ? (
-                                    <ReportDisplay result={result} />
+                                    <ReportDisplay result={result} inputs={inputs} />
                                 ) : (
                                     <DetailedReport result={result} inputs={inputs} />
                                 )}

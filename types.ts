@@ -9,16 +9,9 @@ export interface Investor {
     associatedCostsRate: number;
 }
 
-export interface IdealistaListing {
-    description: string;
-    price: number;
-    surface: number;
-    url: string;
-}
-
 export interface IdealistaData {
     averagePricePerSqm: number;
-    similarListings: IdealistaListing[];
+    idealistaMapUrl: string;
 }
 
 export const IdealistaDataSchema = {
@@ -28,34 +21,12 @@ export const IdealistaDataSchema = {
             type: Type.NUMBER,
             description: "El precio medio por metro cuadrado en la zona de la dirección proporcionada.",
         },
-        similarListings: {
-            type: Type.ARRAY,
-            description: "Una lista de 3 a 5 anuncios de inmuebles similares encontrados cerca de la dirección.",
-            items: {
-                type: Type.OBJECT,
-                properties: {
-                    description: {
-                        type: Type.STRING,
-                        description: "Una breve descripción del inmueble, como 'Piso en Calle de la Luna' o 'Chalet en venta'."
-                    },
-                    price: {
-                        type: Type.NUMBER,
-                        description: "El precio de venta del inmueble en euros."
-                    },
-                    surface: {
-                        type: Type.NUMBER,
-                        description: "La superficie del inmueble en metros cuadrados."
-                    },
-                    url: {
-                        type: Type.STRING,
-                        description: "El enlace directo (URL) a la página del anuncio en Idealista."
-                    }
-                },
-                required: ["description", "price", "surface", "url"]
-            }
+        idealistaMapUrl: {
+            type: Type.STRING,
+            description: "La URL directa y funcional al mapa de precios de Idealista para la dirección proporcionada, por ejemplo: 'https://www.idealista.com/maps/elche-elx-alicante/calle-dr-caro/'."
         }
     },
-    required: ["averagePricePerSqm", "similarListings"]
+    required: ["averagePricePerSqm", "idealistaMapUrl"]
 };
 
 export interface RealEstateDealInput {

@@ -135,7 +135,10 @@ export const useDealCalculator = () => {
 
         try {
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-            const prompt = `Basado en los datos más recientes de Idealista.com para la dirección '${inputs.propertyAddress}', proporciona el precio medio por metro cuadrado en esa zona específica. Además, encuentra entre 3 y 5 anuncios de venta de inmuebles similares (pisos o casas) cerca de esa dirección. Para cada anuncio, facilita una breve descripción, el precio, la superficie en m² y la URL directa al anuncio en Idealista. Devuelve la respuesta como un objeto JSON estructurado.`;
+            const prompt = `Actúa como un experto inmobiliario. Tu tarea es encontrar dos datos clave sobre la dirección '${inputs.propertyAddress}' usando Idealista.com:
+1. El precio medio actual por metro cuadrado (€/m²) en esa zona específica.
+2. La URL exacta y funcional del mapa de precios de Idealista para esa dirección (por ejemplo, 'https://www.idealista.com/maps/elche-elx-alicante/calle-dr-caro/').
+Devuelve únicamente un objeto JSON con estos dos datos. No incluyas listados de propiedades individuales ni ningún otro texto.`;
             
             const response = await ai.models.generateContent({
                 model: "gemini-2.5-flash",

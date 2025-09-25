@@ -25,8 +25,8 @@ const App: React.FC = () => {
 
 
     return (
-        <div className="min-h-screen p-2 sm:p-4">
-            <main className="mx-auto">
+        <div className="min-h-screen p-4 md:px-6 lg:px-8">
+            <main className="mx-auto w-full max-w-screen-2xl">
                 <header className="text-center mb-6 sm:mb-10">
                     <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">
                         AO HOME

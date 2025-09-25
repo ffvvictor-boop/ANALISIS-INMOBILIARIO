@@ -50,28 +50,17 @@ const IdealistaResults: React.FC<IdealistaResultsProps> = ({ data, isLoading, er
                 <p className="text-3xl font-bold text-white">{formatCurrency(data.averagePricePerSqm)}/m²</p>
             </div>
             
-            <div>
-                <h4 className="font-semibold text-gray-100 mb-2">Testigos de Venta Similares</h4>
-                <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
-                    {data.similarListings.map((listing, index) => (
-                        <a 
-                            href={listing.url} 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
-                            key={index} 
-                            className="block bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 transition-all duration-300"
-                        >
-                            <div className="flex justify-between items-start">
-                                <p className="text-sm text-gray-200 flex-1 pr-4">{listing.description}</p>
-                                <div className="text-right flex-shrink-0">
-                                    <p className="font-bold text-white">{formatCurrency(listing.price)}</p>
-                                    <p className="text-xs text-gray-300">{listing.surface} m²</p>
-                                </div>
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </div>
+            {data.idealistaMapUrl && (
+                <a 
+                    href={data.idealistaMapUrl}
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="block w-full text-center bg-blue-600/80 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-600 transition-all duration-300 transform hover:scale-105"
+                >
+                    <i className="fas fa-map-marked-alt mr-2"></i>
+                    Ver mapa de precios en Idealista
+                </a>
+            )}
         </div>
     );
 };

@@ -16,7 +16,7 @@ const formatPercent = (value: number) => `${value.toFixed(2)}%`;
 
 const DetailRow: React.FC<DetailRowProps> = ({ label, value, isSubtotal, isTotal, indent, isSubHeader, isPdf }) => {
     const textColor = isPdf ? 'text-gray-800' : 'text-white';
-    const subHeaderColor = isPdf ? 'text-gray-600' : 'text-gray-300';
+    const subHeaderColor = isPdf ? 'text-gray-600' : 'text-gray-200';
 
     if (isSubHeader) {
         return <h4 className={`font-semibold ${subHeaderColor} mt-4 mb-1`}>{label}</h4>
@@ -45,7 +45,7 @@ const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDe
         : "bg-black/20 backdrop-blur-xl p-4 sm:p-6 rounded-2xl shadow-lg border border-white/20 text-white space-y-4 sm:space-y-6 max-h-[80vh] overflow-y-auto text-sm sm:text-base";
 
     const titleColor = isPdf ? 'text-gray-800' : 'text-white';
-    const textColor = isPdf ? 'text-gray-500' : 'text-gray-300';
+    const textColor = isPdf ? 'text-gray-500' : 'text-gray-200';
     const accentColor = isPdf ? 'text-green-600' : 'text-green-400';
     const accentTealColor = isPdf ? 'text-teal-600' : 'text-teal-400';
 
@@ -78,7 +78,7 @@ const DetailedReport: React.FC<{ result: CalculationResult; inputs: RealEstateDe
                 <DetailRow label={`ICIO (${inputs.icioRate}%)`} value={details.icioTax} indent isPdf={isPdf}/>
                 <DetailRow label="Alta de Suministros" value={details.supplySetupCost} indent isPdf={isPdf}/>
                 <DetailRow label="Total Reforma y Acondicionamiento" value={result.totalRenovationCost} isSubtotal isPdf={isPdf}/>
-            </Section>
+            </section>
 
             <Section title="Resumen de Inversión Total" icon="fa-solid fa-sack-xmark" isPdf={isPdf}>
                  <DetailRow label="Total Costes de Compra" value={result.totalPurchaseCost} isPdf={isPdf}/>

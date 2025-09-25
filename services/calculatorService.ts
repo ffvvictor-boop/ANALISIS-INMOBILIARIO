@@ -2,6 +2,7 @@ import { RealEstateDealInput, CalculationResult, InvestorBreakdown, CalculationD
 
 const SUPPLY_SETUP_FEE = 250;
 const VAT_RATE = 0.21;
+const CLEANING_FEE_MONTHLY_VAT_INCLUDED = 30 * (1 + VAT_RATE);
 
 const getPurchaseTaxRate = (type: string): number => {
     switch (type) {
@@ -105,8 +106,15 @@ export const analyzeRealEstateDeal = (inputs: RealEstateDealInput): CalculationR
     const netProfitAfterTax = investorBreakdown.reduce((sum, inv) => sum + inv.netProfit, 0);
 
     // 7. Rental Yield
-    const grossAnnualRent = inputs.monthlyRent * 12;
-    const annualExpenses = inputs.ibiFee + inputs.insuranceFee + (inputs.cleaningFee * 12);
+    const totalMonthlyRent = inputs.rentalType === 'traditional'
+        ? inputs.monthlyRent
+        : (inputs.numberOfRooms * inputs.rentPerRoom);
+
+    const managementFee = inputs.includeManagementFee ? totalMonthlyRent : 0;
+    const cleaningAnnualFee = inputs.includeCleaningFee ? CLEANING_FEE_MONTHLY_VAT_INCLUDED * 12 : 0;
+
+    const grossAnnualRent = totalMonthlyRent * 12;
+    const annualExpenses = inputs.ibiFee + inputs.insuranceFee + managementFee + cleaningAnnualFee;
     const netAnnualRent = grossAnnualRent - annualExpenses;
     const grossRentalYield = totalProjectCost > 0 ? (grossAnnualRent / totalProjectCost) * 100 : 0;
     const netRentalYield = totalProjectCost > 0 ? (netAnnualRent / totalProjectCost) * 100 : 0;

@@ -31,8 +31,13 @@ export interface RealEstateDealInput {
     monthlyRent: number;
     ibiFee: number;
     insuranceFee: number;
-    cleaningFee: number;
     investors: Investor[];
+    // New rental fields
+    rentalType: 'traditional' | 'rooms';
+    numberOfRooms: number;
+    rentPerRoom: number;
+    includeManagementFee: boolean;
+    includeCleaningFee: boolean;
 }
 
 export interface InvestorBreakdown {

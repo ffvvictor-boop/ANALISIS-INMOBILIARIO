@@ -17,18 +17,18 @@ const formatValue = (value: number, isCurrency: boolean) => {
 };
 
 const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, icon, color, isCurrency = false, highlight }) => {
-    let backgroundClasses = 'bg-gray-100';
-    let titleClasses = 'text-gray-500';
-    let valueClasses = 'text-gray-800';
+    let backgroundClasses = 'bg-white/10';
+    let titleClasses = 'text-gray-300';
+    let valueClasses = 'text-white';
 
     if (highlight === 'green') {
-        backgroundClasses = 'bg-green-200';
-        titleClasses = 'text-green-900/80';
-        valueClasses = 'text-green-900';
+        backgroundClasses = 'bg-green-500/20';
+        titleClasses = 'text-green-200/80';
+        valueClasses = 'text-green-200';
     } else if (highlight === 'red') {
-        backgroundClasses = 'bg-red-200';
-        titleClasses = 'text-red-900/80';
-        valueClasses = 'text-red-900';
+        backgroundClasses = 'bg-red-500/20';
+        titleClasses = 'text-red-200/80';
+        valueClasses = 'text-red-200';
     }
 
     return (

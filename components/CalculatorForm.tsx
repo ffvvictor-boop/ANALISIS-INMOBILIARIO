@@ -12,11 +12,9 @@ interface DealFormProps {
     onAnalyze: () => void;
     totalParticipation: number;
     result: CalculationResult | null;
-    onIdealistaSearch: () => void;
-    isSearchingIdealista: boolean;
 }
 
-const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorChange, onInvestorCountChange, onReset, onAnalyze, totalParticipation, result, onIdealistaSearch, isSearchingIdealista }) => {
+const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorChange, onInvestorCountChange, onReset, onAnalyze, totalParticipation, result }) => {
     
     const [projectionTab, setProjectionTab] = useState<'sale' | 'rent'>('sale');
     const totalParticipationRounded = parseFloat(totalParticipation.toFixed(2));
@@ -39,26 +37,6 @@ const DealForm: React.FC<DealFormProps> = ({ inputs, onInputChange, onInvestorCh
             <div className="space-y-4">
                 
                 <Section title="Compra del Inmueble" icon="fa-solid fa-file-signature" defaultOpen={true}>
-                    <div className="space-y-2">
-                        <InputField id="propertyAddress" label="Dirección del Inmueble" type="text" icon="fa-solid fa-map-marker-alt" value={inputs.propertyAddress} onChange={onInputChange} />
-                         <button
-                            onClick={onIdealistaSearch}
-                            disabled={isSearchingIdealista || !inputs.propertyAddress}
-                            className="w-full bg-teal-600/80 text-white font-bold py-2 px-4 rounded-lg hover:bg-teal-600 transition-all duration-300 text-sm disabled:bg-gray-500/50 disabled:cursor-not-allowed flex items-center justify-center"
-                            aria-label="Buscar datos de mercado en Idealista"
-                        >
-                            {isSearchingIdealista ? (
-                                <>
-                                    <i className="fas fa-spinner fa-spin mr-2"></i> Buscando...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fas fa-search-location mr-2"></i> Buscar en Idealista
-                                </>
-                            )}
-                        </button>
-                    </div>
-                    <hr className="border-white/10 my-4" />
                     <InputField id="propertyValue" label="Valor del Inmueble" type="number" icon="fa-solid fa-euro-sign" value={inputs.propertyValue} onChange={onInputChange} unit="€" />
                     <SelectField id="purchaseTaxType" label="Impuesto de Compra" icon="fa-solid fa-percent" value={inputs.purchaseTaxType} onChange={onInputChange} options={[
                         { value: 'itp_10', label: 'ITP (10%)' },

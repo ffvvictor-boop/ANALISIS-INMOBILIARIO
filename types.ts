@@ -1,3 +1,4 @@
+
 import { Type } from "@google/genai";
 
 export interface Investor {
@@ -9,28 +10,7 @@ export interface Investor {
     associatedCostsRate: number;
 }
 
-export interface IdealistaData {
-    averagePricePerSqm: number;
-    idealistaMapUrl: string;
-}
-
-export const IdealistaDataSchema = {
-    type: Type.OBJECT,
-    properties: {
-        averagePricePerSqm: {
-            type: Type.NUMBER,
-            description: "El precio medio por metro cuadrado en la zona de la dirección proporcionada.",
-        },
-        idealistaMapUrl: {
-            type: Type.STRING,
-            description: "La URL directa y funcional al mapa de precios de Idealista para la dirección proporcionada, por ejemplo: 'https://www.idealista.com/maps/elche-elx-alicante/calle-dr-caro/'."
-        }
-    },
-    required: ["averagePricePerSqm", "idealistaMapUrl"]
-};
-
 export interface RealEstateDealInput {
-    propertyAddress: string;
     propertyValue: number;
     purchaseTaxType: string;
     notaryFees: number;
@@ -144,4 +124,10 @@ export interface CalculationResult {
         traditional: RentalAnalysis;
         byRooms: RentalAnalysis;
     };
+}
+
+// FIX: Add missing IdealistaData interface to resolve import error.
+export interface IdealistaData {
+    averagePricePerSqm: number;
+    idealistaMapUrl: string;
 }

@@ -3,7 +3,6 @@ import DealForm from './components/CalculatorForm';
 import ReportDisplay from './components/ResultsDisplay';
 import DetailedReport from './components/DetailedReport';
 import { useDealCalculator } from './hooks/useDealCalculator';
-import IdealistaResults from './components/IdealistaResults';
 
 const App: React.FC = () => {
     const [reportView, setReportView] = useState<'summary' | 'details'>('summary');
@@ -17,10 +16,6 @@ const App: React.FC = () => {
         handleReset,
         handleAnalyze,
         totalParticipation,
-        handleIdealistaSearch,
-        idealistaData,
-        isSearching,
-        searchError,
     } = useDealCalculator();
 
 
@@ -47,8 +42,6 @@ const App: React.FC = () => {
                             onAnalyze={handleAnalyze}
                             totalParticipation={totalParticipation}
                             result={result}
-                            onIdealistaSearch={handleIdealistaSearch}
-                            isSearchingIdealista={isSearching}
                         />
                     </div>
                     <div className="lg:col-span-3">
@@ -71,12 +64,6 @@ const App: React.FC = () => {
                                 ) : (
                                     <DetailedReport result={result} inputs={inputs} />
                                 )}
-
-                                <IdealistaResults 
-                                    data={idealistaData} 
-                                    isLoading={isSearching} 
-                                    error={searchError} 
-                                />
 
                             </div>
                         ) : (

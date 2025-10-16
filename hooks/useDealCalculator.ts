@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { RealEstateDealInput, CalculationResult, Investor, IdealistaData } from '../types';
+import { RealEstateDealInput, CalculationResult, Investor } from '../types';
 import { analyzeRealEstateDeal } from '../services/calculatorService';
 
 const initialInvestors: Investor[] = [{ 
@@ -12,7 +12,6 @@ const initialInvestors: Investor[] = [{
 }];
 
 const initialInputs: RealEstateDealInput = {
-    propertyAddress: '',
     propertyValue: 110000,
     purchaseTaxType: 'itp_10',
     notaryFees: 600,
@@ -48,9 +47,6 @@ const initialInputs: RealEstateDealInput = {
 export const useDealCalculator = () => {
     const [inputs, setInputs] = useState<RealEstateDealInput>(initialInputs);
     const [result, setResult] = useState<CalculationResult | null>(null);
-    const [idealistaData, setIdealistaData] = useState<IdealistaData | null>(null);
-    const [isSearching, setIsSearching] = useState(false);
-    const [searchError, setSearchError] = useState<string | null>(null);
 
     const handleAnalyze = useCallback(() => {
         const calculatedResult = analyzeRealEstateDeal(inputs);
@@ -124,54 +120,10 @@ export const useDealCalculator = () => {
             return { ...prev, investors: newInvestors };
         });
     }, []);
-
-    const handleIdealistaSearch = useCallback(async () => {
-        if (!inputs.propertyAddress) return;
-
-        const WORKER_URL = 'https://chatgpt-proxy.ffv-victor.workers.dev/';
-
-        setIsSearching(true);
-        setSearchError(null);
-        setIdealistaData(null);
-
-        try {
-            const response = await fetch(WORKER_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ address: inputs.propertyAddress }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'Error de comunicación con el servidor.' }));
-                throw new Error(errorData.message || `Error del servidor: ${response.status}`);
-            }
-
-            const data: IdealistaData = await response.json();
-            
-            // Validación simple para asegurar que la respuesta tiene la estructura esperada.
-            if (typeof data.averagePricePerSqm !== 'number' || typeof data.idealistaMapUrl !== 'string') {
-                console.error("Respuesta inesperada del worker:", data);
-                throw new Error("La respuesta del servidor no tiene el formato esperado.");
-            }
-
-            setIdealistaData(data);
-
-        } catch (error) {
-            console.error("Error al buscar datos a través del worker:", error);
-            const errorMessage = error instanceof Error ? error.message : "No se pudieron obtener los datos. Por favor, intenta de nuevo.";
-            setSearchError(errorMessage);
-        } finally {
-            setIsSearching(false);
-        }
-    }, [inputs.propertyAddress]);
     
     const handleReset = useCallback(() => {
         setInputs(initialInputs);
         setResult(null);
-        setIdealistaData(null);
-        setSearchError(null);
     }, []);
 
     const totalParticipation = inputs.investors.reduce((sum, inv) => sum + inv.participation, 0);
@@ -185,9 +137,5 @@ export const useDealCalculator = () => {
         handleReset,
         handleAnalyze,
         totalParticipation,
-        handleIdealistaSearch,
-        idealistaData,
-        isSearching,
-        searchError
     };
 };

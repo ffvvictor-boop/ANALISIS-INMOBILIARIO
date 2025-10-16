@@ -58,7 +58,9 @@ const ReportDisplay: React.FC<ReportDisplayProps> = ({ result, inputs }) => {
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
                 <div className="lg:col-span-2">
                      <GrowthChart 
-                        cost={result.totalProjectCost} 
+                        purchaseCost={result.totalPurchaseCost}
+                        renovationCost={result.totalRenovationCost}
+                        totalCost={result.totalProjectCost} 
                         saleValue={inputs.salePrice} 
                         profit={result.saleProfitBeforeTax}
                     />
